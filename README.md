@@ -1,1 +1,1 @@
-# astory-server
+# A Story server
