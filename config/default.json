@@ -1,0 +1,30 @@
+{
+  "server": {
+    "port": 9030
+  },
+  "mongodb": {
+    "ASTORY": {
+      "DB": "mongodb://localhost:27017/atory",
+      "USER": "user",
+      // "VERIFY": "verify",
+      // "COLLECT": "collect",
+      "ARTICLE": "article",
+      // "IMAGE": "image",
+      // "COMMENT": "comment",
+      // "FOLLOW": "follow",
+      // "REPORT": "report",
+      // "SPECIALTOPIC": "specialTopic",
+      // "QUESTION": "question",
+      // "ANSWER": "answer",
+      "INTRO": "intro"
+    }
+  },
+  "Con": {
+    "COOKIE_EXPIRE": 604800000,
+    "EXPIRE_TIME": 300000
+  },
+  "profile": {
+    "uploadPath": "/Users/veryci/Documents/tmp",
+    "fileHost": "http://imgs.atory.cc"
+  }
+}
