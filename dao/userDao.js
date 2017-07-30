@@ -2,10 +2,23 @@ const crypto = require('crypto');
 const ObjectID = require('mongodb').ObjectID;
 const MongoClient = require('mongodb').MongoClient;
 const config = require('config');
-const { UserSchema } = require('../schema/User');
-// const Lang = require('../config/lang.cn');
 
 const DB_CONFIG = config.get('mongodb');
+
+const UserSchema = {
+  email: null, // *unique
+  password: null,
+  username: null,
+  userAvatar: '',
+  sign: '',
+  wechatPay: '',
+  aliPay: '',
+  follow: 0,
+  banner: '',
+  createDate: new Date(),
+  lastUpdate: new Date(),
+  lastLogin: new Date(),
+};
 
 function UserDao(url) {
   this.url = url || DB_CONFIG.ASTORY.DB;
@@ -30,8 +43,9 @@ UserDao.prototype.init = async function init() {
 };
 
 UserDao.prototype.createUser = async function createUser(para) {
-  const { email, password, username } = para;
-  const record = Object.assign({}, User, { email, username });
+  const { email, password, username = 'hi' } = para;
+  console.log(UserSchema)
+  const record = Object.assign({}, UserSchema, { email, username });
   record._id = new ObjectID();
   record.password = generate(password);
   if (!this.connected) {
@@ -45,11 +59,14 @@ UserDao.prototype.createUser = async function createUser(para) {
       this.ColUser.update({ email }, { $set: { lastLogin: new Date() } });
       return existOne;
     }
-    throw new this.Err(`${Lang.WRONG_PWD}`, 403);
+    throw new this.Err(`密码错误`, 403);
   }
   const r = await this.ColUser.insertOne(record);
   if (r.result && r.result.ok === 1 && r.result.n === 1) {
-    return r;
+    return {
+      _id: r.insertedId,
+      email, username
+    };
   }
   throw new this.Err('mongo insert err');
 };

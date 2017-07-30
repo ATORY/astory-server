@@ -1,7 +1,7 @@
-const koa = require('koa')
-const koaRouter = require('koa-router')
-const koaBody = require('koa-bodyparser')
-const { graphqlKoa, graphiqlKoa } = require('graphql-server-koa')
+const koa = require('koa');
+const koaRouter = require('koa-router');
+const koaBody = require('koa-bodyparser');
+const { graphqlKoa, graphiqlKoa } = require('graphql-server-koa');
 const { makeExecutableSchema } = require('graphql-tools');
 
 const schema = require('./schema');
@@ -12,20 +12,16 @@ const router = new koaRouter();
 const PORT = 3000;
 
 app.use(koaBody())
+
 router.post('/graphql', graphqlKoa({
   schema
 }));
 
-// router.get('/graphql', graphqlKoa({ 
-//   schema: schema,
-// }))
-
-router.get('/graphql', graphiqlKoa(ctx => ({
-  schema: schema,
+router.get('/graphiql', graphiqlKoa({ 
+  endpointURL: '/graphql',
+  debug: true,
   // context: { user: request.session.user }
-})));
-
-router.get('/graphiql', graphiqlKoa({ endpointURL: '/graphql' }));
+}));
 
 app.use(router.routes());
 app.use(router.allowedMethods());
@@ -33,15 +29,4 @@ app.use(router.allowedMethods());
 app.listen(PORT, () => {
   console.log('server start ')
 });
-// (async () => {
-//   // await pgClient.connect()
-//   const client = await PGPool.connect();
-//   try {
-//     const res = await PGPool.query('SELECT $1::text as message', ['Hello world!'])
-//     console.log(res.rows[0].message) // Hello world!  
-//   }finally {
-//     app.listen(PORT);
-//     client.release()
-//   }
-  
-// })().catch(e => console.log(e.stack));
+

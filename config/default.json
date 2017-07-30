@@ -4,7 +4,7 @@
   },
   "mongodb": {
     "ASTORY": {
-      "DB": "mongodb://localhost:27017/atory",
+      "DB": "mongodb://localhost:27017/astory",
       "USER": "user",
       // "VERIFY": "verify",
       // "COLLECT": "collect",

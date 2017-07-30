@@ -5,25 +5,6 @@ const DB_CONFIG = config.get('mongodb');
 const articleDao = require('../dao/articleDao').getService();
 const userDao = require('../dao/userDao').getService();
 
-const ArticleSchema = {
-  userId: null, // ObjectID
-  title: null, // cell 显示
-  shareImg: '',
-  head: null, // cell 显示
-  description: null, // 简述
-  content: null,
-  labels: [],
-  read: 0,
-  good: 0,
-  collect: 0,
-  comment: 0,
-  createDate: new Date(),
-  updateDate: new Date(),
-  reject: false,
-  rejectResion: '',
-  topicId: '',
-};
-
 const Article = `
   type Article {
     _id: ID!
@@ -58,4 +39,3 @@ const ArticleResolver = {
 exports.Article = Article;
 exports.ArticleQuery = ArticleQuery;
 exports.ArticleResolver = ArticleResolver;
-exports.ArticleSchema = ArticleSchema;
