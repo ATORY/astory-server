@@ -3,6 +3,11 @@ const { makeExecutableSchema } = require('graphql-tools');
 
 const { User, UserResolver, UserQuery, UserMutation } = require('./User');
 const { Article, ArticleResolver, ArticleQuery } = require('./Article');
+// const { ArticleOprateTime } = require('./ArticleOprateTime')
+const { Comment, CommentQuery, CommentResolver } = require('./Comment');
+const { Good, GoodQuery, GoodResolver } = require('./Good');
+const { Collect, CollectQuery, CollectResolver } = require('./Collect');
+const { Read, ReadQuery, ReadResolver } = require('./Read');
 
 const RootQuery = `
   type Query {
@@ -31,11 +36,20 @@ const SchemaDefinition = `
 `;
 
 const RootResolvers = {
-  Query: merge(ArticleQuery, UserQuery),
+  Query: merge(
+    ArticleQuery, UserQuery, CommentQuery, GoodQuery,
+    CollectQuery, ReadQuery
+  ),
   Mutation: merge(UserMutation),
 }
 
 module.exports = makeExecutableSchema({
-  typeDefs: [ SchemaDefinition, RootQuery, RootMutation, Article, User ],
-  resolvers: merge(RootResolvers, ArticleResolver, UserResolver),
+  typeDefs: [ 
+    SchemaDefinition, RootQuery, RootMutation, Article,
+    User, Comment, Good, Collect, Read 
+  ],
+  resolvers: merge(
+    RootResolvers, ArticleResolver, UserResolver, CommentResolver, GoodResolver, 
+    CollectResolver, ReadResolver
+  ),
 });

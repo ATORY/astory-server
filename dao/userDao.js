@@ -5,218 +5,75 @@ const config = require('config');
 
 const DB_CONFIG = config.get('mongodb');
 
-const UserSchema = {
-  email: null, // *unique
-  password: null,
-  username: null,
-  userAvatar: '',
-  sign: '',
-  wechatPay: '',
-  aliPay: '',
-  follow: 0,
-  banner: '',
-  createDate: new Date(),
-  lastUpdate: new Date(),
-  lastLogin: new Date(),
-};
-
-function UserDao(url) {
-  this.url = url || DB_CONFIG.ASTORY.DB;
-  this.connected = false;
-  this.Err = function UserErr(message, status) {
-    this.name = 'UserErr';
-    this.message = message || 'UserErr';
-    this.status = status || 401;
-    this.stack = (new Error(message)).stack;
-  };
-}
-
-module.exports.getService = function getService() {
-  return new UserDao();
-};
-
-UserDao.prototype.init = async function init() {
-  this.db = await MongoClient.connect(this.url);
-  this.ColUser = this.db.collection(DB_CONFIG.ASTORY.USER);
-  this.connected = true;
-  this.db.on('close', () => { this.connected = false; });
-};
-
-UserDao.prototype.createUser = async function createUser(para) {
-  const { email, password, username = 'hi' } = para;
-  console.log(UserSchema)
-  const record = Object.assign({}, UserSchema, { email, username });
-  record._id = new ObjectID();
-  record.password = generate(password);
-  if (!this.connected) {
-    await this.init();
-  }
-  const existOne = await this.ColUser.findOne({ email });
-  if (existOne && existOne.password) {
-    const password2 = existOne.password;
-    if (check(password2, password)) {
-      existOne.password = null;
-      this.ColUser.update({ email }, { $set: { lastLogin: new Date() } });
-      return existOne;
-    }
-    throw new this.Err(`密码错误`, 403);
-  }
-  const r = await this.ColUser.insertOne(record);
-  if (r.result && r.result.ok === 1 && r.result.n === 1) {
-    return {
-      _id: r.insertedId,
-      email, username
+class UserDao {
+  constructor(url) {
+    this.Schema = {
+      email: null, // *unique
+      password: null,
+      username: null,
+      userAvatar: '',
+      sign: '',
+      wechatPay: '',
+      aliPay: '',
+      follow: 0,
+      banner: '',
+      createDate: new Date(),
+      lastUpdate: new Date(),
+      lastLogin: new Date(),
+    };
+    this.url = url || DB_CONFIG.ASTORY.DB;
+    this.db = null;
+    this.Coll = null;
+    this.connected = false;
+    this.Err = function UserErr(message, status) {
+      this.name = 'UserErr';
+      this.message = message || 'UserErr';
+      this.status = status || 401;
+      this.stack = (new Error(message)).stack;
     };
   }
-  throw new this.Err('mongo insert err');
-};
 
-UserDao.prototype.getUser = async function getUser(uid) {
-  let userId = uid;
-  if (typeof userId === 'string') {
-    userId = new ObjectID(uid);
-  }
-  if (!this.connected) {
-    await this.init();
-  }
-  const fields = {
-    email: 1,
-    username: 1,
-    userAvatar: 1,
-    wechatPay: 1,
-    aliPay: 1,
-    lastLogin: 1,
-    sign: 1,
-    follow: 1,
-    banner: 1,
+  async init() {
+    this.db = await MongoClient.connect(this.url);
+    this.Coll= this.db.collection(DB_CONFIG.ASTORY.USER);
+    this.connected = true;
+    this.db.on('close', () => { this.connected = false; });
   };
-  const user = await this.ColUser.findOne({ _id: userId }, { fields });
-  return user;
-};
 
-UserDao.prototype.updateUserPWD = async function createUser(para) {
-  const email = para.email;
-  let password = para.password;
-  password = generate(password);
-  if (!this.connected) {
-    await this.init();
-  }
-  const user = await this.ColUser.findOne({ email });
-  if (user) {
-    const r = await this.ColUser.update({ email }, { $set: { password } });
-    return r.result;
-  }
-  throw new this.Err(`${Lang.NO_SUCH_USER}`, 404);
-};
-
-UserDao.prototype.updateUserAvatar = async function updateUserAvatar(uid, avatarPath) {
-  let userId = uid;
-  if (typeof userId === 'string') {
-    userId = new ObjectID(uid);
-  }
-  if (!this.connected) {
-    await this.init();
-  }
-  const r = await this.ColUser.update({ _id: userId }, { $set: { userAvatar: avatarPath } });
-  return r.result;
-};
-
-UserDao.prototype.updateUserBanner = async function updateUserBanner(uid, avatarPath) {
-  let userId = uid;
-  if (typeof userId === 'string') {
-    userId = new ObjectID(uid);
-  }
-  if (!this.connected) {
-    await this.init();
-  }
-  const r = await this.ColUser.update({ _id: userId }, { $set: { banner: avatarPath } });
-  return r.result;
-};
-
-UserDao.prototype.updateUserWechatPay = async function createUser(uid, filePath) {
-  let userId = uid;
-  if (typeof userId === 'string') {
-    userId = new ObjectID(uid);
-  }
-  if (!this.connected) {
-    await this.init();
-  }
-  const r = await this.ColUser.update({ _id: userId }, { $set: { wechatPay: filePath } });
-  return r.result;
-};
-
-UserDao.prototype.updateUserAliPay = async function createUser(uid, filePath) {
-  let userId = uid;
-  if (typeof userId === 'string') {
-    userId = new ObjectID(uid);
-  }
-  if (!this.connected) {
-    await this.init();
-  }
-  const r = await this.ColUser.update({ _id: userId }, { $set: { aliPay: filePath } });
-  return r.result;
-};
-
-UserDao.prototype.updateUser = async function createUser(uid, updateObj) {
-  let userId = uid;
-  if (typeof userId === 'string') {
-    userId = new ObjectID(uid);
-  }
-  if (!this.connected) {
-    await this.init();
-  }
-  const r = await this.ColUser.update({ _id: userId }, { $set: updateObj });
-  return r.result;
-};
-
-
-UserDao.prototype.login = async function login(option) {
-  const { email, password } = option;
-  if (!this.connected) {
-    await this.init();
-  }
-  const user = await this.ColUser.findOne({ email });
-  if (user) {
-    const password2 = user.password;
-    if (check(password2, password)) {
-      user.password = null;
-      this.ColUser.update({ email }, { $set: { lastLogin: new Date() } });
-      return user;
+  async createUser(para) {
+    const { email, password, username = 'hi' } = para;
+    const record = Object.assign({}, this.Schema, { email, username });
+    record._id = new ObjectID();
+    record.password = generate(password);
+    if (!this.connected) { await this.init(); }
+    const existOne = await this.ColUser.findOne({ email });
+    if (existOne && existOne.password) {
+      const password2 = existOne.password;
+      if (check(password2, password)) {
+        existOne.password = null;
+        this.ColUser.update({ email }, { $set: { lastLogin: new Date() } });
+        return existOne;
+      }
+      throw new this.Err(`密码错误`, 403);
     }
-    throw new this.Err(`${Lang.WRONG_PWD}`, 403);
-  }
-  throw new this.Err(`${Lang.NO_SUCH_USER}`, 404);
-};
-
-function random() {
-  let text = '';
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-  for (let i = 0; i < 8; i += 1) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
-}
-
-function generate(pwd) {
-  const salt = random();
-  const hash = crypto.pbkdf2Sync(pwd, salt, 1000, 32, 'sha256').toString('hex');
-  return `${salt}.${hash}`;
-}
-
-function check(hmac, password) {
-  const ts = hmac.split('.');
-  const salt = ts[0];
-  const token = ts[1];
-  return token === crypto.pbkdf2Sync(password, salt, 1000, 32, 'sha256').toString('hex');
-}
-
-// ============== test function ============//
-UserDao.prototype.drop = async function drop() {
-  if (process.env.NODE_ENV === 'test') {
-    if (!this.connected) {
-      await this.init();
+    const r = await this.ColUser.insertOne(record);
+    if (r.result && r.result.ok === 1 && r.result.n === 1) {
+      return {
+        _id: r.insertedId,
+        email, username
+      };
     }
-    await this.ColUser.deleteMany({});
-  }
-};
+    throw new this.Err('mongo insert err');
+  };
 
+  async getUser(userId) {
+    if (!( userId instanceof ObjectID )) {
+      throw new this.Err(`userId should be ObjectID`, 403);
+    }
+    if (!this.connected) {  await this.init(); };
+    const user = await this.Coll.findOne({ _id: userId });
+    return user;
+  };
+}
+
+module.exports = new UserDao();

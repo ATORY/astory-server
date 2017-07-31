@@ -1,10 +1,20 @@
 const Comment = `
   type Comment {
-    id: Int!
+    _id: ID!
     message: String
     time: String
     author: String
   }
 `;
-// export default Comment;
-module.exports = Comment
+
+const CommentQuery = {
+
+};
+
+const CommentResolver = {
+
+};
+
+exports.Comment = Comment;
+exports.CommentQuery = CommentQuery;
+exports.CommentResolver = CommentResolver;

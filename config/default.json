@@ -4,13 +4,16 @@
   },
   "mongodb": {
     "ASTORY": {
-      "DB": "mongodb://localhost:27017/astory",
+      "DB": "mongodb://localhost:27017/atory",
       "USER": "user",
       // "VERIFY": "verify",
-      // "COLLECT": "collect",
+      
       "ARTICLE": "article",
       // "IMAGE": "image",
-      // "COMMENT": "comment",
+      "COMMENT": "comment",
+      "COLLECT": "collect",
+      "READ": "read",
+      "GOOD": "good",
       // "FOLLOW": "follow",
       // "REPORT": "report",
       // "SPECIALTOPIC": "specialTopic",
