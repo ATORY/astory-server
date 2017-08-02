@@ -1,6 +1,6 @@
 {
   "server": {
-    "port": 9030
+    "PORT": 4000
   },
   "mongodb": {
     "ASTORY": {

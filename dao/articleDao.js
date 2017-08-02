@@ -48,10 +48,11 @@ class ArticleDao {
     }
     if (!this.connected) await this.init();
     const query = currentId ? { _id: { $lt: new ObjectID(currentId) } } : {};
-    const projection = {
-      title: 1, userId: 1, read: 1, good: 1, collect: 1, head: 1, labels: 1, description: 1, createDate: 1,
-    };
-    const articles = await this.Coll.find(query).project(projection)
+    // const projection = {
+    //   title: 1, userId: 1, read: 1, good: 1, collect: 1, head: 1, labels: 1, description: 1, createDate: 1,
+    // };
+    const articles = await this.Coll.find(query)
+      // .project(projection)
       .sort({ _id: -1 })
       .limit(15)
       .toArray();

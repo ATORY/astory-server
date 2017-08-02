@@ -16,6 +16,15 @@ const User = `
     goods: [Good]
     reads: [Read]
   }
+
+  input UserInput {
+    email: String! 
+    password: String! 
+  }
+  
+  input UserUpdate {
+    username: String
+  }
 `
 
 const UserQuery = {
@@ -27,9 +36,10 @@ const UserQuery = {
 }
 
 const UserMutation = {
-  newUser: async (_, { email, password }) => {
-    const user = await userDao.createUser({email, password});
-    return user;
+  newUser: async (_, { user }) => {
+    const { email, password } = user;
+    const newUser = await userDao.createUser({email, password});
+    return newUser;
   }
 }
 

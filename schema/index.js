@@ -11,19 +11,21 @@ const { Read, ReadQuery, ReadResolver } = require('./Read');
 
 const RootQuery = `
   type Query {
-
-    #Article query
+    
+    # Article query
     articles(_id: ID): [Article]
     article(_id: ID!): Article
 
-    #User query
+    # User query
     user(_id: ID!): User
   }
 `;
 
 const RootMutation = `
   type Mutation {
-    newUser( email: String!, password: String! ): User
+    newUser( user: UserInput! ): User
+    # newComment(): Comment
+    # newGood(): Good
   }
 `;
 

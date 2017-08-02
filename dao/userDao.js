@@ -46,17 +46,17 @@ class UserDao {
     record._id = new ObjectID();
     record.password = generate(password);
     if (!this.connected) { await this.init(); }
-    const existOne = await this.ColUser.findOne({ email });
+    const existOne = await this.Coll.findOne({ email });
     if (existOne && existOne.password) {
       const password2 = existOne.password;
       if (check(password2, password)) {
         existOne.password = null;
-        this.ColUser.update({ email }, { $set: { lastLogin: new Date() } });
+        this.Coll.update({ email }, { $set: { lastLogin: new Date() } });
         return existOne;
       }
       throw new this.Err(`密码错误`, 403);
     }
-    const r = await this.ColUser.insertOne(record);
+    const r = await this.Coll.insertOne(record);
     if (r.result && r.result.ok === 1 && r.result.n === 1) {
       return {
         _id: r.insertedId,
@@ -77,3 +77,26 @@ class UserDao {
 }
 
 module.exports = new UserDao();
+
+
+function random() {
+  let text = '';
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  for (let i = 0; i < 8; i += 1) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+}
+
+function generate(pwd) {
+  const salt = random();
+  const hash = crypto.pbkdf2Sync(pwd, salt, 1000, 32, 'sha256').toString('hex');
+  return `${salt}.${hash}`;
+}
+
+function check(hmac, password) {
+  const ts = hmac.split('.');
+  const salt = ts[0];
+  const token = ts[1];
+  return token === crypto.pbkdf2Sync(password, salt, 1000, 32, 'sha256').toString('hex');
+}
