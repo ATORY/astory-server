@@ -17,6 +17,7 @@ const RootQuery = `
     article(_id: ID!): Article
 
     # User query
+    auth: User
     user(_id: ID!): User
   }
 `;

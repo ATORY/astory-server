@@ -8,9 +8,10 @@ const readDao = require('../dao/readDao');
 
 const User = `
   type User {
-    _id: ID!
-    email: String!
+    _id: ID
+    email: String
     username: String
+    userAvatar: String
     articles(articleId: ID): [Article]
     collects: [Collect]
     goods: [Good]
@@ -32,14 +33,22 @@ const UserQuery = {
     const userId = new ObjectID(_id);
     const user = await userDao.getUser(userId);
     return user;
-  }
+  },
+  auth: (_, args, context, info) => {
+    return context.session.user || {};
+  },
 }
 
 const UserMutation = {
-  newUser: async (_, { user }) => {
+  newUser: async (_, { user }, context) => {
     const { email, password } = user;
-    const newUser = await userDao.createUser({email, password});
-    return newUser;
+    if(email && password) {
+      const newUser = await userDao.createUser({email, password});
+      context.session.user = newUser;
+      return newUser;
+    }else {
+      return context.session.user || {};
+    }
   }
 }
 
