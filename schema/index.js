@@ -2,7 +2,7 @@ const { merge } = require('lodash');
 const { makeExecutableSchema } = require('graphql-tools');
 
 const { User, UserResolver, UserQuery, UserMutation } = require('./User');
-const { Article, ArticleResolver, ArticleQuery } = require('./Article');
+const { Article, ArticleResolver, ArticleQuery, ArticleMutation } = require('./Article');
 // const { ArticleOprateTime } = require('./ArticleOprateTime')
 const { Comment, CommentQuery, CommentResolver } = require('./Comment');
 const { Good, GoodQuery, GoodResolver } = require('./Good');
@@ -25,6 +25,7 @@ const RootQuery = `
 const RootMutation = `
   type Mutation {
     newUser( user: UserInput! ): User
+    newArticle( article: ArticleInput! ): Article
     # newComment(): Comment
     # newGood(): Good
   }
@@ -43,7 +44,7 @@ const RootResolvers = {
     ArticleQuery, UserQuery, CommentQuery, GoodQuery,
     CollectQuery, ReadQuery
   ),
-  Mutation: merge(UserMutation),
+  Mutation: merge(UserMutation, ArticleMutation),
 }
 
 module.exports = makeExecutableSchema({

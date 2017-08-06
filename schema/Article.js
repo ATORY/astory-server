@@ -1,7 +1,7 @@
 const ObjectID = require('mongodb').ObjectID;
 const config = require('config');
 const DB_CONFIG = config.get('mongodb');
-
+const moment = require('moment');
 
 const articleDao = require('../dao/articleDao');
 const userDao = require('../dao/userDao');
@@ -26,6 +26,16 @@ const Article = `
     commentNumber: Int
     comments(limit: Int): [Comment]
     # refers(limit): [Article]
+    draft: Boolean
+    publishDate: String
+  }
+
+  input ArticleInput{
+    _id: ID
+    title: String
+    content: String
+    labels: [String]
+    draft: Boolean
   }
 `;
 
@@ -38,6 +48,32 @@ const ArticleQuery = {
     const articleId = new ObjectID(_id);
     const article = await articleDao.findArticle(articleId);
     return article;
+  }
+}
+
+const ArticleMutation = {
+  newArticle: async (_, { article }, context) => {
+    const { user } = context.session;
+    if(user) {
+      let articleId = new ObjectID();
+      const userId = new ObjectID(user._id);
+      const { _id, title, content, draft } = article;
+      const newArticle = { _id, title, content, draft };
+      if(_id) {
+        newArticleId = new ObjectID(_id);
+        newArticle.updateDate = new Date();
+      }else {
+        newArticle.createDate = new Date();
+      }
+      if(draft === false) {
+        newArticle.publishDate = new Date();
+      }
+      newArticle._id = articleId;
+      await articleDao.newArticle(userId, newArticle);
+      return { _id: articleId, draft };
+    }else {
+      return {}
+    }
   }
 }
 
@@ -73,10 +109,16 @@ const ArticleResolver = {
       const { limit } = args;
       const comments = await commentDao.numberComments(_id, limit);
       return comments;
+    },
+    publishDate: (article) => {
+      const { publishDate } = article;
+      const date = moment(publishDate).utc().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
+      return date;
     }
   }
 }
 
 exports.Article = Article;
 exports.ArticleQuery = ArticleQuery;
+exports.ArticleMutation = ArticleMutation;
 exports.ArticleResolver = ArticleResolver;

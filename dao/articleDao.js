@@ -14,12 +14,14 @@ class ArticleDao {
       description: null, // 简述
       content: null,
       labels: [],
+      draft: true,
       // read: 0,
       // good: 0,
       // collect: 0,
       // comment: 0,
       createDate: new Date(),
       updateDate: new Date(),
+      publishDate: new Date(),
       reject: false,
       rejectResion: '',
       topicId: '',
@@ -47,7 +49,9 @@ class ArticleDao {
       throw this.Err('article id should be string')
     }
     if (!this.connected) await this.init();
-    const query = currentId ? { _id: { $lt: new ObjectID(currentId) } } : {};
+    const query = currentId ? 
+      { _id: { $lt: new ObjectID(currentId) }, draft: false } : 
+      {draft: false};
     // const projection = {
     //   title: 1, userId: 1, read: 1, good: 1, collect: 1, head: 1, labels: 1, description: 1, createDate: 1,
     // };
@@ -75,6 +79,21 @@ class ArticleDao {
     if (!this.connected) await this.init();
     const articles = await this.Coll.find({ userId }).sort({ _id: -1 }).toArray();
     return articles;
+  };
+
+  async newArticle(userId, article) {
+    if (!(userId instanceof ObjectID )) {
+      throw new Error('userId should be ObjectID');
+    }
+    const _newOne = Object.assign({}, this.Schema);
+    const newOne = Object.assign(_newOne, { userId }, article);
+    if (!this.connected) await this.init();
+    const { _id } = newOne;
+    const r = await this.Coll.update({ _id }, { $set: newOne }, { upsert: true });
+    if (r.result && r.result.ok === 1 && r.result.n === 1) {
+      return r;
+    }
+    throw new this.Err('mongo insert err');
   };
 }
 

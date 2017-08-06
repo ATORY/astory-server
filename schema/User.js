@@ -47,7 +47,7 @@ const UserMutation = {
       context.session.user = newUser;
       return newUser;
     }else {
-      return context.session.user || {};
+      return {};
     }
   }
 }
