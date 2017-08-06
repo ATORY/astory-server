@@ -10,7 +10,7 @@ class ArticleDao {
       userId: null, // ObjectID
       title: null, // cell 显示
       shareImg: '',
-      head: null, // cell 显示
+      // head: null, // cell 显示
       description: null, // 简述
       content: null,
       labels: [],

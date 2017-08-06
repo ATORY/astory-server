@@ -15,6 +15,7 @@ const Article = `
     _id: ID!
     title: String
     content: String
+    shareImg: String
     labels: [String]
     author: User
     readNumber: Int
@@ -34,6 +35,7 @@ const Article = `
     _id: ID
     title: String
     content: String
+    shareImg: String
     labels: [String]
     draft: Boolean
   }
@@ -47,6 +49,14 @@ const ArticleQuery = {
   article: async (_, { _id }) => {
     const articleId = new ObjectID(_id);
     const article = await articleDao.findArticle(articleId);
+    if(article.reject === true) {
+      article.content = '被撤销';
+      return article;  
+    }
+    if(article.draft === true) {
+      article.content = '尚未发布或被撤销'
+      return article;
+    }
     return article;
   }
 }
@@ -55,10 +65,10 @@ const ArticleMutation = {
   newArticle: async (_, { article }, context) => {
     const { user } = context.session;
     if(user) {
-      let articleId = new ObjectID();
+      let newArticleId = new ObjectID();
       const userId = new ObjectID(user._id);
-      const { _id, title, content, draft } = article;
-      const newArticle = { _id, title, content, draft };
+      const { _id, title, content, shareImg, draft } = article;
+      const newArticle = { _id, title, content, shareImg,  draft };
       if(_id) {
         newArticleId = new ObjectID(_id);
         newArticle.updateDate = new Date();
@@ -68,9 +78,9 @@ const ArticleMutation = {
       if(draft === false) {
         newArticle.publishDate = new Date();
       }
-      newArticle._id = articleId;
+      newArticle._id = newArticleId;
       await articleDao.newArticle(userId, newArticle);
-      return { _id: articleId, draft };
+      return { _id: newArticleId, draft };
     }else {
       return {}
     }
