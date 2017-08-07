@@ -1,20 +1,19 @@
-const koa = require('koa');
-const koaRouter = require('koa-router');
+const Koa = require('koa');
+const KoaRouter = require('koa-router');
 const koaBody = require('koa-bodyparser');
 const { graphqlKoa, graphiqlKoa } = require('graphql-server-koa');
-const { makeExecutableSchema } = require('graphql-tools');
 const config = require('config');
 const cors = require('koa-cors');
 const session = require('koa-session');
+const winston = require('winston');
 
 const schema = require('./schema');
-const { PGPool } = require('./db');
+const loggerMiddleware = require('./utils').loggerMiddleware;
 
 const SERVER_CONFIG = config.get('server');
 
-const app = new koa();
-const router = new koaRouter();
-const PORT = 3000;
+const app = new Koa();
+const router = new KoaRouter();
 
 app.keys = ['some secret hurr'];
 
@@ -27,33 +26,39 @@ const CONFIG = {
   overwrite: true, /** (boolean) can overwrite or not (default true) */
   httpOnly: true, /** (boolean) httpOnly or not (default true) */
   signed: true, /** (boolean) signed or not (default true) */
-  rolling: false, /** (boolean) Force a session identifier cookie to be set on every response. The expiration is reset to the original maxAge, resetting the expiration countdown. default is false **/
+  rolling: false,
 };
 
+app.use(loggerMiddleware);
 app.use(session(CONFIG, app));
 
-app.use(koaBody())
+app.use(koaBody());
 app.use(cors({
-  credentials: true
+  credentials: true,
 }));
 
-router.post('/graphql', graphqlKoa((ctx) => ({
-  schema,
-  debug: true,
-  context: { 
-    session: ctx.session,
-    ctx
-  }
+router.post('/graphql', graphqlKoa((ctx) => {
+  // console.log(ctx.logger);
+  const graphqlKoaConfig = {
+    schema,
+    debug: process.env.NODE_ENV !== 'production',
+    context: {
+      session: ctx.session,
+      ctx,
+      logger: ctx.logger,
+    },
+  };
+  return graphqlKoaConfig;
+}));
+
+router.get('/graphiql', graphiqlKoa(() => ({
+  endpointURL: '/graphql',
 })));
-
-router.get('/graphiql', graphiqlKoa( ctx => { 
-  endpointURL: '/graphql'
-}));
 
 app.use(router.routes());
 app.use(router.allowedMethods());
 
 app.listen(SERVER_CONFIG.PORT, () => {
-  console.log(`server start at ${SERVER_CONFIG.PORT}`);
+  winston.info(`server start at ${SERVER_CONFIG.PORT}`);
 });
 
