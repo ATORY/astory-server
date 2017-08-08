@@ -22,7 +22,6 @@ class Collect extends Base {
   async articleCollectNumber(articleId) {
     if (!this.connected) await this.init();
     const total = await this.Coll.find({ articleId, collect: true }).count();
-    console.log(total);
     return total;
   }
 

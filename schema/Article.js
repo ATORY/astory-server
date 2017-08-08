@@ -110,9 +110,23 @@ const ArticleMutation = {
     if (user && user._id) {
       const userId = new ObjectID(user._id);
       const collectArticleId = new ObjectID(articleId);
-      collectRecord = await collectDao.newUserCollect(userId, collectArticleId, collect)
+      collectRecord = await collectDao.newUserCollect(userId, collectArticleId, collect);
     }
     return collectRecord;
+  },
+
+  newArticleComment: async (_, { articleId, content, originCommentId }, context) => {
+    let comment = {};
+    const { user } = context.session;
+    if (user && user._id) {
+      const userId = new ObjectID(user._id);
+      const commentArticleId = new ObjectID(articleId);
+      const originCId = originCommentId ? new ObjectID(originCommentId) : '';
+      comment = await commentDao.newArticleComment(
+        userId, commentArticleId, content, originCId,
+      );
+    }
+    return comment;
   },
 };
 

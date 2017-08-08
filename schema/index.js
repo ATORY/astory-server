@@ -29,6 +29,7 @@ const RootMutation = `
     newArticle( article: ArticleInput! ): Article
     markArticle( articleId: String!, mark: Boolean! ): Mark
     collectArticle( articleId: String!, collect: Boolean! ): Collect
+    newArticleComment( articleId: String!, content: String!, originCommentId: String ): Comment
     # newComment(): Comment
     # newGood(): Good
   }

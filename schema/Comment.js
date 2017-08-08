@@ -1,9 +1,13 @@
+const moment = require('moment');
+
+const userDao = require('../dao/userDao');
+
 const Comment = `
   type Comment {
     _id: ID!
-    message: String
-    time: String
-    author: String
+    content: String
+    createDate: String
+    user: User
   }
 `;
 
@@ -12,7 +16,18 @@ const CommentQuery = {
 };
 
 const CommentResolver = {
-
+  Comment: {
+    createDate: (comment) => {
+      const { createDate } = comment;
+      const date = moment(createDate).utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+      return date;
+    },
+    user: async (comment) => {
+      const { userId } = comment;
+      const user = await userDao.getUser(userId);
+      return user;
+    },
+  },
 };
 
 exports.Comment = Comment;

@@ -35,6 +35,19 @@ class CommentDao extends Base {
     const commentsNumber = await this.numbers(articleId);
     return commentsNumber;
   }
+
+  async newArticleComment(userId, articleId, content, originCommentId) {
+    if (!(articleId instanceof ObjectID)) {
+      throw new Error('articleId should be ObjectID');
+    }
+    if (!this.connected) await this.init();
+    const _id = new ObjectID();
+    const createDate = new Date();
+    const newComment = Object.assign({}, this.Schema,
+      { _id, userId, articleId, originCommentId, content, createDate });
+    await this.Coll.insert(newComment);
+    return newComment;
+  }
 }
 
 module.exports = new CommentDao();
