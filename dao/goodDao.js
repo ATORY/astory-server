@@ -1,8 +1,9 @@
-const MongoClient = require('mongodb').MongoClient;
-const ObjectID = require('mongodb').ObjectID;
+// const MongoClient = require('mongodb').MongoClient;
+// const ObjectID = require('mongodb').ObjectID;
 const config = require('config');
 
 const Base = require('./BaseDao');
+
 const DB_CONFIG = config.get('mongodb');
 
 class Read extends Base {
@@ -15,13 +16,13 @@ class Read extends Base {
       articleId: null,
       good: false,
       createDate: new Date(),
-    }
+    };
   }
 
   async articleGoodNumber(articleId) {
     const goodNumber = await this.numbers(articleId);
     return goodNumber;
-  };
+  }
 
   async userGoods(userId) {
     const goods = await this.articles(userId);

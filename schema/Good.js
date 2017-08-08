@@ -14,13 +14,13 @@ const GoodQuery = {
 
 const GoodResolver = {
   Good: {
-    article:  async (good, args, context, info) => {
+    article: async (good, args, context, info) => {
       const { articleId } = good;
       const article = await articleDao.findArticle(articleId);
       return article;
-    }
-  }
-}
+    },
+  },
+};
 
 exports.Good = Good;
 exports.GoodQuery = GoodQuery;

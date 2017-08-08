@@ -9,9 +9,9 @@
       // "VERIFY": "verify",
       
       "ARTICLE": "article",
-      // "IMAGE": "image",
       "COMMENT": "comment",
       "COLLECT": "collect",
+      "MARK": "mark",
       "READ": "read",
       "GOOD": "good",
       // "FOLLOW": "follow",
@@ -19,6 +19,7 @@
       // "SPECIALTOPIC": "specialTopic",
       // "QUESTION": "question",
       // "ANSWER": "answer",
+      // "IMAGE": "image",
       "INTRO": "intro"
     }
   },

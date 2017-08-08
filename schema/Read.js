@@ -18,8 +18,8 @@ const ReadResolver = {
       const { articleId } = read;
       const article = await articleDao.findArticle(articleId);
       return article;
-    }
-  }
+    },
+  },
 };
 
 exports.Read = Read;

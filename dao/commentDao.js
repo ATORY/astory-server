@@ -1,4 +1,4 @@
-const MongoClient = require('mongodb').MongoClient;
+// const MongoClient = require('mongodb').MongoClient;
 const ObjectID = require('mongodb').ObjectID;
 const config = require('config');
 
@@ -23,17 +23,18 @@ class CommentDao extends Base {
 
   async numberComments(articleId, number = 5) {
     if (!(articleId instanceof ObjectID)) {
-      throw new Error('articleId should be ObjectID')
+      throw new Error('articleId should be ObjectID');
     }
     if (!this.connected) await this.init();
-    const comments = await this.Coll.find({ articleId }).sort({ _id: -1 }).limit(number).toArray();
+    const comments = await this.Coll.find({ articleId })
+      .sort({ _id: -1 }).limit(number).toArray();
     return comments;
-  };
+  }
 
   async articleCommnetsNumber(articleId) {
     const commentsNumber = await this.numbers(articleId);
     return commentsNumber;
-  };
+  }
 }
 
 module.exports = new CommentDao();

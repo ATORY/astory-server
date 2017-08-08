@@ -46,47 +46,44 @@ class ArticleDao {
 
   async allArticles(currentId) {
     if (currentId && (typeof currentId !== 'string')) {
-      throw this.Err('article id should be string')
+      throw this.Err('article id should be string');
     }
     if (!this.connected) await this.init();
-    const query = currentId ? 
-      { _id: { $lt: new ObjectID(currentId) }, draft: false } : 
-      {draft: false};
-    // const projection = {
-    //   title: 1, userId: 1, read: 1, good: 1, collect: 1, head: 1, labels: 1, description: 1, createDate: 1,
-    // };
+    const query = currentId ?
+      { _id: { $lt: new ObjectID(currentId) }, draft: false } :
+      { draft: false };
     const articles = await this.Coll.find(query)
       // .project(projection)
       .sort({ _id: -1 })
       .limit(15)
       .toArray();
     return articles;
-  };
+  }
 
   async findArticle(articleId, userId) {
-    if (!( articleId instanceof ObjectID )) {
-      throw this.Err('articleId should be string')
+    if (!(articleId instanceof ObjectID)) {
+      throw this.Err('articleId should be string');
     }
+    // record user read userId
     if (!this.connected) await this.init();
-    const article = await this.Coll.findOne({ _id: articleId })
+    const article = await this.Coll.findOne({ _id: articleId });
     return article;
-  };
+  }
 
   async userArticles(userId, articleId) {
-    if (!(userId instanceof ObjectID )) {
+    if (!(userId instanceof ObjectID)) {
       throw new Error('userId should be ObjectID');
     }
     if (!this.connected) await this.init();
     const articles = await this.Coll.find({ userId }).sort({ _id: -1 }).toArray();
     return articles;
-  };
+  }
 
   async newArticle(userId, article) {
-    if (!(userId instanceof ObjectID )) {
+    if (!(userId instanceof ObjectID)) {
       throw new Error('userId should be ObjectID');
     }
-    const _newOne = Object.assign({}, this.Schema);
-    const newOne = Object.assign(_newOne, { userId }, article);
+    const newOne = Object.assign({}, this.Schema, { userId }, article);
     if (!this.connected) await this.init();
     const { _id } = newOne;
     const r = await this.Coll.update({ _id }, { $set: newOne }, { upsert: true });
@@ -94,7 +91,7 @@ class ArticleDao {
       return r;
     }
     throw new this.Err('mongo insert err');
-  };
+  }
 }
 
 module.exports = new ArticleDao();

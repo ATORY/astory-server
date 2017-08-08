@@ -5,6 +5,29 @@ const config = require('config');
 
 const DB_CONFIG = config.get('mongodb');
 
+
+function random() {
+  let text = '';
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  for (let i = 0; i < 8; i += 1) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+}
+
+function generate(pwd) {
+  const salt = random();
+  const hash = crypto.pbkdf2Sync(pwd, salt, 1000, 32, 'sha256').toString('hex');
+  return `${salt}.${hash}`;
+}
+
+function check(hmac, password) {
+  const ts = hmac.split('.');
+  const salt = ts[0];
+  const token = ts[1];
+  return token === crypto.pbkdf2Sync(password, salt, 1000, 32, 'sha256').toString('hex');
+}
+
 class UserDao {
   constructor(url) {
     this.Schema = {
@@ -35,10 +58,10 @@ class UserDao {
 
   async init() {
     this.db = await MongoClient.connect(this.url);
-    this.Coll= this.db.collection(DB_CONFIG.ASTORY.USER);
+    this.Coll = this.db.collection(DB_CONFIG.ASTORY.USER);
     this.connected = true;
     this.db.on('close', () => { this.connected = false; });
-  };
+  }
 
   async createUser(para) {
     const { email, password, username = 'hi' } = para;
@@ -54,49 +77,27 @@ class UserDao {
         this.Coll.update({ email }, { $set: { lastLogin: new Date() } });
         return existOne;
       }
-      throw new this.Err(`密码错误`, 403);
+      throw new this.Err('密码错误', 403);
     }
     const r = await this.Coll.insertOne(record);
     if (r.result && r.result.ok === 1 && r.result.n === 1) {
       return {
         _id: r.insertedId,
-        email, username
+        email,
+        username,
       };
     }
     throw new this.Err('mongo insert err');
-  };
+  }
 
   async getUser(userId) {
-    if (!( userId instanceof ObjectID )) {
-      throw new this.Err(`userId should be ObjectID`, 403);
+    if (!(userId instanceof ObjectID)) {
+      throw new this.Err('userId should be ObjectID', 403);
     }
-    if (!this.connected) {  await this.init(); };
+    if (!this.connected) { await this.init(); }
     const user = await this.Coll.findOne({ _id: userId });
     return user;
-  };
+  }
 }
 
 module.exports = new UserDao();
-
-
-function random() {
-  let text = '';
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-  for (let i = 0; i < 8; i += 1) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
-}
-
-function generate(pwd) {
-  const salt = random();
-  const hash = crypto.pbkdf2Sync(pwd, salt, 1000, 32, 'sha256').toString('hex');
-  return `${salt}.${hash}`;
-}
-
-function check(hmac, password) {
-  const ts = hmac.split('.');
-  const salt = ts[0];
-  const token = ts[1];
-  return token === crypto.pbkdf2Sync(password, salt, 1000, 32, 'sha256').toString('hex');
-}

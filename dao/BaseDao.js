@@ -13,26 +13,26 @@ class Base {
 
   async init(collection) {
     this.db = await MongoClient.connect(this.url);
-    this.Coll = this.db.collection(this.collection);
+    this.Coll = this.db.collection(collection || this.collection);
     this.connected = true;
-    this.db.on('close', () => { this.connected = false; });  
+    this.db.on('close', () => { this.connected = false; });
   }
 
   async numbers(articleId) {
     if (!(articleId instanceof ObjectID)) {
-      throw new Error('articleId should be ObjectID')
+      throw new Error('articleId should be ObjectID');
     }
     if (!this.connected) await this.init();
     const numbers = await this.Coll.find({ articleId }).count();
     return numbers;
-  };
+  }
 
   async articles(userId) {
-    if(!(userId instanceof ObjectID )) {
+    if (!(userId instanceof ObjectID)) {
       throw new Error('userId should be ObjectID');
     }
     if (!this.connected) await this.init();
-    const articles = await this.Coll.find({userId}).sort({ _id: -1 }).toArray();
+    const articles = await this.Coll.find({ userId }).sort({ _id: -1 }).toArray();
     return articles;
   }
 }

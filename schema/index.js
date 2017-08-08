@@ -6,6 +6,7 @@ const { Article, ArticleResolver, ArticleQuery, ArticleMutation } = require('./A
 // const { ArticleOprateTime } = require('./ArticleOprateTime')
 const { Comment, CommentQuery, CommentResolver } = require('./Comment');
 const { Good, GoodQuery, GoodResolver } = require('./Good');
+const { Mark, MarkQuery, MarkResolver } = require('./Mark');
 const { Collect, CollectQuery, CollectResolver } = require('./Collect');
 const { Read, ReadQuery, ReadResolver } = require('./Read');
 
@@ -26,6 +27,7 @@ const RootMutation = `
   type Mutation {
     newUser( user: UserInput! ): User
     newArticle( article: ArticleInput! ): Article
+    markArticle( articleId: String!, mark: Boolean! ): Mark
     # newComment(): Comment
     # newGood(): Good
   }
@@ -42,18 +44,18 @@ const SchemaDefinition = `
 const RootResolvers = {
   Query: merge(
     ArticleQuery, UserQuery, CommentQuery, GoodQuery,
-    CollectQuery, ReadQuery
+    CollectQuery, ReadQuery, MarkQuery,
   ),
   Mutation: merge(UserMutation, ArticleMutation),
-}
+};
 
 module.exports = makeExecutableSchema({
-  typeDefs: [ 
+  typeDefs: [
     SchemaDefinition, RootQuery, RootMutation, Article,
-    User, Comment, Good, Collect, Read 
+    User, Comment, Good, Collect, Read, Mark,
   ],
   resolvers: merge(
-    RootResolvers, ArticleResolver, UserResolver, CommentResolver, GoodResolver, 
-    CollectResolver, ReadResolver
+    RootResolvers, ArticleResolver, UserResolver, CommentResolver, GoodResolver,
+    CollectResolver, ReadResolver, MarkResolver,
   ),
 });

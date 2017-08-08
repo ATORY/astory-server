@@ -26,7 +26,7 @@ const User = `
   input UserUpdate {
     username: String
   }
-`
+`;
 
 const UserQuery = {
   user: async (_, { _id }) => {
@@ -34,23 +34,21 @@ const UserQuery = {
     const user = await userDao.getUser(userId);
     return user;
   },
-  auth: (_, args, context, info) => {
-    return context.session.user || {};
-  },
-}
+  auth: (_, args, context, info) => (context.session.user || {}),
+};
 
 const UserMutation = {
   newUser: async (_, { user }, context) => {
     const { email, password } = user;
-    if(email && password) {
-      const newUser = await userDao.createUser({email, password});
-      context.session.user = newUser;
+    const { session } = context;
+    if (email && password) {
+      const newUser = await userDao.createUser({ email, password });
+      session.user = newUser;
       return newUser;
-    }else {
-      return {};
     }
-  }
-}
+    return {};
+  },
+};
 
 const UserResolver = {
   User: {
@@ -75,8 +73,8 @@ const UserResolver = {
       const reads = await readDao.userReads(_id);
       return reads;
     },
-  }
-}
+  },
+};
 
 exports.User = User;
 exports.UserQuery = UserQuery;

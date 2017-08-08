@@ -1,8 +1,9 @@
-const MongoClient = require('mongodb').MongoClient;
-const ObjectID = require('mongodb').ObjectID;
+// const MongoClient = require('mongodb').MongoClient;
+// const ObjectID = require('mongodb').ObjectID;
 const config = require('config');
 
 const Base = require('./BaseDao');
+
 const DB_CONFIG = config.get('mongodb');
 
 class Collect extends Base {
@@ -15,13 +16,13 @@ class Collect extends Base {
       articleId: null,
       collect: false, // true: collect, false: collected
       createDate: new Date(),
-    }
-  };
+    };
+  }
 
   async articleCollectNumber(articleId) {
     const collectNumber = await this.numbers(articleId);
     return collectNumber;
-  };
+  }
 
   async userCollects(userId) {
     const collects = await this.articles(userId);

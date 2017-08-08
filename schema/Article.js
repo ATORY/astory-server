@@ -1,6 +1,5 @@
 const ObjectID = require('mongodb').ObjectID;
-const config = require('config');
-const DB_CONFIG = config.get('mongodb');
+// const config = require('config');
 const moment = require('moment');
 
 const articleDao = require('../dao/articleDao');
@@ -9,6 +8,7 @@ const commentDao = require('../dao/commentDao');
 const collectDao = require('../dao/collectDao');
 const readDao = require('../dao/readDao');
 const goodDao = require('../dao/goodDao');
+const markDao = require('../dao/markDao');
 
 const Article = `
   type Article {
@@ -29,6 +29,7 @@ const Article = `
     # refers(limit): [Article]
     draft: Boolean
     publishDate: String
+    mark: Boolean
   }
 
   input ArticleInput{
@@ -44,48 +45,57 @@ const Article = `
 const ArticleQuery = {
   articles: async (_, { _id }) => {
     const articles = await articleDao.allArticles(_id);
-    return articles
+    return articles;
   },
   article: async (_, { _id }) => {
     const articleId = new ObjectID(_id);
     const article = await articleDao.findArticle(articleId);
-    if(article.reject === true) {
+    if (article.reject === true) {
       article.content = '被撤销';
-      return article;  
+      return article;
     }
-    if(article.draft === true) {
-      article.content = '尚未发布或被撤销'
+    if (article.draft === true) {
+      article.content = '尚未发布或被撤销';
       return article;
     }
     return article;
-  }
-}
+  },
+};
 
 const ArticleMutation = {
   newArticle: async (_, { article }, context) => {
     const { user } = context.session;
-    if(user) {
+    if (user) {
       let newArticleId = new ObjectID();
       const userId = new ObjectID(user._id);
       const { _id, title, content, shareImg, draft } = article;
-      const newArticle = { _id, title, content, shareImg,  draft };
-      if(_id) {
+      const newArticle = { _id, title, content, shareImg, draft };
+      if (_id) {
         newArticleId = new ObjectID(_id);
         newArticle.updateDate = new Date();
-      }else {
+      } else {
         newArticle.createDate = new Date();
       }
-      if(draft === false) {
+      if (draft === false) {
         newArticle.publishDate = new Date();
       }
       newArticle._id = newArticleId;
       await articleDao.newArticle(userId, newArticle);
       return { _id: newArticleId, draft };
-    }else {
-      return {}
     }
-  }
-}
+    return {};
+  },
+  markArticle: async (_, { articleId, mark }, context) => {
+    let markRecord = {};
+    const { user } = context.session;
+    if (user && user._id) {
+      const userId = new ObjectID(user._id);
+      const markArticleId = new ObjectID(articleId);
+      markRecord = await markDao.newUserMark(userId, markArticleId, mark);
+    }
+    return markRecord;
+  },
+};
 
 const ArticleResolver = {
   Article: {
@@ -99,17 +109,17 @@ const ArticleResolver = {
       const readNumber = readDao.articleReadNumber(_id);
       return readNumber;
     },
-    goodNumber: async (article, args, content, info) => {
+    goodNumber: async (article, args, context, info) => {
       const { _id } = article;
       const goodNumber = goodDao.articleGoodNumber(_id);
       return goodNumber;
     },
-    collectNumber: async (article, args, content, info) => {
+    collectNumber: async (article, args, context, info) => {
       const { _id } = article;
       const collectNumber = await collectDao.articleCollectNumber(_id);
       return collectNumber;
     },
-    commentNumber: async (article, args, content, info) => {
+    commentNumber: async (article, args, context, info) => {
       const { _id } = article;
       const commentNumber = await commentDao.articleCommnetsNumber(_id);
       return commentNumber;
@@ -122,11 +132,20 @@ const ArticleResolver = {
     },
     publishDate: (article) => {
       const { publishDate } = article;
-      const date = moment(publishDate).utc().format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
+      const date = moment(publishDate).utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
       return date;
-    }
-  }
-}
+    },
+    mark: async (article, args, context, info) => {
+      const { user } = context.session;
+      if (user && user._id) {
+        const userId = new ObjectID(user._id);
+        const markRecord = await markDao.userMark(userId, article._id);
+        return markRecord.mark || false;
+      }
+      return false;
+    },
+  },
+};
 
 exports.Article = Article;
 exports.ArticleQuery = ArticleQuery;
