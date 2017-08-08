@@ -60,11 +60,10 @@ class ArticleDao {
     return articles;
   }
 
-  async findArticle(articleId, userId) {
+  async findArticle(articleId) {
     if (!(articleId instanceof ObjectID)) {
       throw this.Err('articleId should be string');
     }
-    // record user read userId
     if (!this.connected) await this.init();
     const article = await this.Coll.findOne({ _id: articleId });
     return article;

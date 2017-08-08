@@ -1,5 +1,5 @@
 // const MongoClient = require('mongodb').MongoClient;
-// const ObjectID = require('mongodb').ObjectID;
+const ObjectID = require('mongodb').ObjectID;
 const config = require('config');
 
 const Base = require('./BaseDao');
@@ -14,7 +14,7 @@ class Read extends Base {
       // _id
       userId: null,
       articleId: null,
-      readTimes: 0,
+      count: 0,
       createDate: new Date(),
     };
   }
@@ -27,6 +27,15 @@ class Read extends Base {
   async userReads(userId) {
     const reads = await this.articles(userId);
     return reads;
+  }
+
+  async userReadCount(userId, articleId) {
+    if (!(articleId instanceof ObjectID)) {
+      throw new Error('userId should be ObjectID');
+    }
+    if (!this.connected) await this.init();
+    this.Coll.update({ userId, articleId }, { $inc: { count: 1 } }, { upsert: true });
+    // return record;
   }
 }
 

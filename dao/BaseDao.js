@@ -23,8 +23,16 @@ class Base {
       throw new Error('articleId should be ObjectID');
     }
     if (!this.connected) await this.init();
-    const numbers = await this.Coll.find({ articleId }).count();
-    return numbers;
+    const numbers = await this.Coll.aggregate([
+      { $match: { articleId } },
+      {
+        $group: {
+          _id: '',
+          total: { $sum: '$count' },
+        },
+      },
+    ]).next();
+    return (numbers && numbers.total) || 0;
   }
 
   async articles(userId) {

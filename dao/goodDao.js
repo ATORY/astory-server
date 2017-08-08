@@ -14,7 +14,7 @@ class Read extends Base {
       // _id
       userId: null,
       articleId: null,
-      good: false,
+      count: false,
       createDate: new Date(),
     };
   }

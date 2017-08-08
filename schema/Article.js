@@ -29,7 +29,10 @@ const Article = `
     # refers(limit): [Article]
     draft: Boolean
     publishDate: String
+
+    # user_mark_collect_or_not
     mark: Boolean
+    collect: Boolean
   }
 
   input ArticleInput{
@@ -47,7 +50,7 @@ const ArticleQuery = {
     const articles = await articleDao.allArticles(_id);
     return articles;
   },
-  article: async (_, { _id }) => {
+  article: async (_, { _id }, context) => {
     const articleId = new ObjectID(_id);
     const article = await articleDao.findArticle(articleId);
     if (article.reject === true) {
@@ -58,6 +61,12 @@ const ArticleQuery = {
       article.content = '尚未发布或被撤销';
       return article;
     }
+    const { user } = context.session;
+    let userId = '';
+    if (user && user._id) {
+      userId = new ObjectID(user._id);
+    }
+    readDao.userReadCount(userId, articleId);
     return article;
   },
 };
@@ -65,7 +74,7 @@ const ArticleQuery = {
 const ArticleMutation = {
   newArticle: async (_, { article }, context) => {
     const { user } = context.session;
-    if (user) {
+    if (user && user._id) {
       let newArticleId = new ObjectID();
       const userId = new ObjectID(user._id);
       const { _id, title, content, shareImg, draft } = article;
@@ -95,36 +104,46 @@ const ArticleMutation = {
     }
     return markRecord;
   },
+  collectArticle: async (_, { articleId, collect }, context) => {
+    let collectRecord = {};
+    const { user } = context.session;
+    if (user && user._id) {
+      const userId = new ObjectID(user._id);
+      const collectArticleId = new ObjectID(articleId);
+      collectRecord = await collectDao.newUserCollect(userId, collectArticleId, collect)
+    }
+    return collectRecord;
+  },
 };
 
 const ArticleResolver = {
   Article: {
-    author: async (article, args, context, info) => {
+    author: async (article) => {
       const { userId } = article;
       const author = await userDao.getUser(userId);
       return author;
     },
-    readNumber: async (article, args, context, info) => {
+    readNumber: async (article) => {
       const { _id } = article;
       const readNumber = readDao.articleReadNumber(_id);
       return readNumber;
     },
-    goodNumber: async (article, args, context, info) => {
+    goodNumber: async (article) => {
       const { _id } = article;
       const goodNumber = goodDao.articleGoodNumber(_id);
       return goodNumber;
     },
-    collectNumber: async (article, args, context, info) => {
+    collectNumber: async (article) => {
       const { _id } = article;
       const collectNumber = await collectDao.articleCollectNumber(_id);
       return collectNumber;
     },
-    commentNumber: async (article, args, context, info) => {
+    commentNumber: async (article) => {
       const { _id } = article;
       const commentNumber = await commentDao.articleCommnetsNumber(_id);
       return commentNumber;
     },
-    comments: async (article, args, context, info) => {
+    comments: async (article, args) => {
       const { _id } = article;
       const { limit } = args;
       const comments = await commentDao.numberComments(_id, limit);
@@ -135,12 +154,21 @@ const ArticleResolver = {
       const date = moment(publishDate).utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
       return date;
     },
-    mark: async (article, args, context, info) => {
+    mark: async (article, args, context) => {
       const { user } = context.session;
       if (user && user._id) {
         const userId = new ObjectID(user._id);
         const markRecord = await markDao.userMark(userId, article._id);
-        return markRecord.mark || false;
+        return (markRecord && markRecord.mark) || false;
+      }
+      return false;
+    },
+    collect: async (article, args, context) => {
+      const { user } = context.session;
+      if (user && user._id) {
+        const userId = new ObjectID(user._id);
+        const record = await collectDao.userCollect(userId, article._id);
+        return (record && record.collect) || false;
       }
       return false;
     },

@@ -3,6 +3,7 @@ const articleDao = require('../dao/articleDao');
 const Collect = `
   type Collect {
     _id: ID!
+    collect: Boolean
     createDate: String
     article: Article
   }
