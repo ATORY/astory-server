@@ -17,13 +17,9 @@ const router = new Router({
 const storage = fsOprate.storage;
 const upload = multer({ storage });
 
-// router.get('/', async (ctx) => {
-//   const userId = ctx.query._id;
-//   if (!userId) ctx.throw(403, '请确保已经登录');
-//   const userImages = await imageDao.userImages(userId);
-//   const images = userImages.map(imageObj => imageObj.imageUrl);
-//   ctx.body = images;
-// });
+router.get('/', async (ctx) => {
+  ctx.body = 'profile';
+});
 
 // form uploadFile
 router.put('/', upload.single('file'), async (ctx) => {
