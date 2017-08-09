@@ -20,7 +20,7 @@ const Article = `
     author: User
     readNumber: Int
     # readUser: [User]
-    goodNumber: Int
+    # goodNumber: Int
     # goodUser: [User]
     collectNumber: Int
     # collectUser: [User]
@@ -142,11 +142,11 @@ const ArticleResolver = {
       const readNumber = readDao.articleReadNumber(_id);
       return readNumber;
     },
-    goodNumber: async (article) => {
-      const { _id } = article;
-      const goodNumber = goodDao.articleGoodNumber(_id);
-      return goodNumber;
-    },
+    // goodNumber: async (article) => {
+    //   const { _id } = article;
+    //   const goodNumber = goodDao.articleGoodNumber(_id);
+    //   return goodNumber;
+    // },
     collectNumber: async (article) => {
       const { _id } = article;
       const collectNumber = await collectDao.articleCollectNumber(_id);
