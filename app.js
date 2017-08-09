@@ -7,6 +7,7 @@ const cors = require('koa-cors');
 const session = require('koa-session');
 const winston = require('winston');
 
+const profile = require('./profile');
 const schema = require('./schema');
 const loggerMiddleware = require('./utils').loggerMiddleware;
 
@@ -14,6 +15,7 @@ const SERVER_CONFIG = config.get('server');
 
 const app = new Koa();
 const router = new KoaRouter();
+
 
 app.keys = ['some secret hurr'];
 
@@ -57,6 +59,7 @@ router.get('/graphiql', graphiqlKoa(() => ({
 
 app.use(router.routes());
 app.use(router.allowedMethods());
+app.use(profile.routes()).use(profile.allowedMethods());
 
 app.listen(SERVER_CONFIG.PORT, () => {
   winston.info(`server start at ${SERVER_CONFIG.PORT}`);
