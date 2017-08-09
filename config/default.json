@@ -28,7 +28,8 @@
     "EXPIRE_TIME": 300000
   },
   "profile": {
-    "uploadPath": "/Users/veryci/Documents/tmp",
-    "fileHost": "http://imgs.atory.cc"
+    "uploadPath": "/tmp",
+    "fileHostBuild": "http://imgs.atory.cc",
+    "fileHost": "http://localhost:9090"
   }
 }

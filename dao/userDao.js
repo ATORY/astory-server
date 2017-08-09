@@ -34,7 +34,7 @@ class UserDao {
       email: null, // *unique
       password: null,
       username: null,
-      userAvatar: '',
+      userAvatar: 'https://avatars3.githubusercontent.com/u/7351139?v=4&s=40',
       sign: '',
       // wechatPay: '',
       // aliPay: '',

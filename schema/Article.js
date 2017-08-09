@@ -12,7 +12,7 @@ const markDao = require('../dao/markDao');
 
 const Article = `
   type Article {
-    _id: ID!
+    _id: ID
     title: String
     content: String
     shareImg: String
