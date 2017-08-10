@@ -3,8 +3,9 @@ const ObjectID = require('mongodb').ObjectID;
 const articleDao = require('../dao/articleDao');
 const userDao = require('../dao/userDao');
 const collectDao = require('../dao/collectDao');
-const goodDao = require('../dao/goodDao');
+// const goodDao = require('../dao/goodDao');
 const readDao = require('../dao/readDao');
+const commentDao = require('../dao/commentDao');
 
 const User = `
   type User {
@@ -14,8 +15,10 @@ const User = `
     userAvatar: String
     articles(articleId: ID): [Article]
     collects: [Collect]
-    goods: [Good]
+    # goods: [Good]
     reads: [Read]
+    comments: [Comment]
+    isSelf: Boolean
   }
 
   input UserInput {
@@ -34,7 +37,7 @@ const UserQuery = {
     const user = await userDao.getUser(userId);
     return user;
   },
-  auth: (_, args, context, info) => (context.session.user || {}),
+  auth: (_, args, context) => (context.session.user || {}),
 };
 
 const UserMutation = {
@@ -52,26 +55,39 @@ const UserMutation = {
 
 const UserResolver = {
   User: {
-    articles: async (user, args, context, info) => {
+    articles: async (user, args) => {
       const { _id } = user;
       const { articleId } = args;
       const articles = await articleDao.userArticles(_id, articleId);
       return articles;
     },
-    collects: async (user, args, context, info) => {
+    collects: async (user) => {
       const { _id } = user;
       const collects = await collectDao.userCollects(_id);
       return collects;
     },
-    goods: async (user, args, context, info) => {
-      const { _id } = user;
-      const goods = await goodDao.userGoods(_id);
-      return goods;
-    },
-    reads: async (user, args, context, info) => {
+    // goods: async (user, args, context, info) => {
+    //   const { _id } = user;
+    //   const goods = await goodDao.userGoods(_id);
+    //   return goods;
+    // },
+    reads: async (user) => {
       const { _id } = user;
       const reads = await readDao.userReads(_id);
       return reads;
+    },
+
+    comments: (user) => {
+      const { _id } = user;
+      const comments = commentDao.userComment(_id);
+      return comments;
+    },
+
+    isSelf: (user, args, context) => {
+      const { _id } = user;
+      const sessionUser = context.session.user;
+      const sessionUserId = sessionUser && sessionUser._id;
+      return _id.toString() === sessionUserId;
     },
   },
 };

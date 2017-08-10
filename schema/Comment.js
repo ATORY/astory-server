@@ -4,7 +4,7 @@ const userDao = require('../dao/userDao');
 
 const Comment = `
   type Comment {
-    _id: ID!
+    _id: ID
     content: String
     createDate: String
     user: User

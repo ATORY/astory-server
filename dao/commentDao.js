@@ -48,6 +48,14 @@ class CommentDao extends Base {
     await this.Coll.insert(newComment);
     return newComment;
   }
+
+  async userComment(userId) {
+    if (!(userId instanceof ObjectID)) {
+      throw new Error('articleId should be ObjectID');
+    }
+    const comments = await this.Coll.find({ userId }).toArray();
+    return comments;
+  }
 }
 
 module.exports = new CommentDao();
