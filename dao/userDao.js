@@ -35,7 +35,7 @@ class UserDao {
       password: null,
       username: null,
       userAvatar: 'https://avatars3.githubusercontent.com/u/7351139?v=4&s=40',
-      sign: '',
+      userIntro: '',
       // wechatPay: '',
       // aliPay: '',
       // follow: 0,
@@ -97,6 +97,23 @@ class UserDao {
     if (!this.connected) { await this.init(); }
     const user = await this.Coll.findOne({ _id: userId });
     return user;
+  }
+
+  async editUser(userId, username, userIntro, userAvatar) {
+    if (!(userId instanceof ObjectID)) {
+      throw new this.Err('userId should be ObjectID', 403);
+    }
+    if (!this.connected) { await this.init(); }
+    await this.Coll.updateOne(
+      { _id: userId },
+      { $set: { username, userIntro, userAvatar } },
+    );
+    return {
+      _id: userId,
+      username,
+      userAvatar,
+      userIntro,
+    };
   }
 }
 

@@ -25,11 +25,13 @@ const RootQuery = `
 
 const RootMutation = `
   type Mutation {
-    newUser( user: UserInput! ): User
-    newArticle( article: ArticleInput! ): Article
-    markArticle( articleId: String!, mark: Boolean! ): Mark
-    collectArticle( articleId: String!, collect: Boolean! ): Collect
+    newUser( user: UserInput!): User
+    editUser( username: String!, userIntro: String, userAvatar: String): User
+    newArticle( article: ArticleInput!): Article
+    markArticle( articleId: String!, mark: Boolean!): Mark
+    collectArticle( articleId: String!, collect: Boolean!): Collect
     newArticleComment( articleId: String!, content: String!, originCommentId: String ): Comment
+    delArticle(articleId: String!): Article
     # newComment(): Comment
     # newGood(): Good
   }

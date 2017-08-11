@@ -61,6 +61,10 @@ const ArticleQuery = {
       article.content = '尚未发布或被撤销';
       return article;
     }
+    if (article.del === true) {
+      article.content = '被删除';
+      return article;
+    }
     const { user } = context.session;
     let userId = '';
     if (user && user._id) {
@@ -127,6 +131,17 @@ const ArticleMutation = {
       );
     }
     return comment;
+  },
+
+  delArticle: async (_, { articleId }, context) => {
+    const { user } = context.session;
+    if (user && user._id) {
+      const userId = new ObjectID(user._id);
+      const delArticleId = new ObjectID(articleId);
+      await articleDao.delArticle(userId, delArticleId);
+      return { _id: articleId };
+    }
+    return {}
   },
 };
 

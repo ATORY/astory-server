@@ -15,6 +15,7 @@ class ArticleDao {
       content: null,
       labels: [],
       draft: true,
+      del: false,
       // read: 0,
       // good: 0,
       // collect: 0,
@@ -50,8 +51,8 @@ class ArticleDao {
     }
     if (!this.connected) await this.init();
     const query = currentId ?
-      { _id: { $lt: new ObjectID(currentId) }, draft: false } :
-      { draft: false };
+      { _id: { $lt: new ObjectID(currentId) }, draft: false, del: false } :
+      { draft: false, del: false };
     const articles = await this.Coll.find(query)
       // .project(projection)
       .sort({ _id: -1 })
@@ -91,6 +92,15 @@ class ArticleDao {
     }
     throw new this.Err('mongo insert err');
   }
+
+  async delArticle(userId, articleId) {
+    if (!(userId instanceof ObjectID)) {
+      throw new Error('userId should be ObjectID');
+    }
+    if (!this.connected) await this.init();
+    await this.Coll.update({ _id: articleId, userId }, { $set: { del: true } });
+  }
+  
 }
 
 module.exports = new ArticleDao();

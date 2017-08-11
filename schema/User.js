@@ -13,6 +13,7 @@ const User = `
     email: String
     username: String
     userAvatar: String
+    userIntro: String
     articles(articleId: ID): [Article]
     collects: [Collect]
     # goods: [Good]
@@ -48,6 +49,17 @@ const UserMutation = {
       const newUser = await userDao.createUser({ email, password });
       session.user = newUser;
       return newUser;
+    }
+    return {};
+  },
+  editUser: async (_, { username, userIntro, userAvatar }, context) => {
+    const { session } = context;
+    const { user } = session;
+    if (user && user._id) {
+      const userId = new ObjectID(user._id);
+      const userInfo = await userDao.editUser(userId, username, userIntro, userAvatar);
+      session.user = Object.assign({}, user, userInfo);
+      return userInfo;
     }
     return {};
   },
