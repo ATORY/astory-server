@@ -6,6 +6,7 @@ const config = require('config');
 const cors = require('koa-cors');
 const session = require('koa-session');
 const winston = require('winston');
+const logger = require('koa-logger');
 
 const profile = require('./profile');
 const schema = require('./schema');
@@ -33,6 +34,7 @@ const CONFIG = {
   rolling: false,
 };
 
+app.use(logger());
 app.use(loggerMiddleware);
 app.use(session(CONFIG, app));
 
