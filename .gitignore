@@ -8,6 +8,7 @@ package-lock.json
 # production
 /build
 .next
+production.json
 
 # misc
 .DS_Store

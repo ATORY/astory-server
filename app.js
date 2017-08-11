@@ -17,7 +17,7 @@ const app = new Koa();
 const router = new KoaRouter();
 
 
-app.keys = ['some secret hurr'];
+app.keys = ['everyone has a story'];
 
 const CONFIG = {
   key: 'koa:sess', /** (string) cookie key (default is koa:sess) */
