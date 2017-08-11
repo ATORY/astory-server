@@ -13,6 +13,8 @@ const loggerMiddleware = require('./utils').loggerMiddleware;
 
 const SERVER_CONFIG = config.get('server');
 
+const fileRoot = config.get('profile.uploadPath');
+
 const app = new Koa();
 const router = new KoaRouter();
 
@@ -62,6 +64,6 @@ app.use(router.allowedMethods());
 app.use(profile.routes()).use(profile.allowedMethods());
 
 app.listen(SERVER_CONFIG.PORT, () => {
-  winston.info(`server start at ${SERVER_CONFIG.PORT}`);
+  winston.info(`${process.env.NODE_ENV}, server start at ${SERVER_CONFIG.PORT}, filePah: ${fileRoot}`);
 });
 
