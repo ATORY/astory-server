@@ -7,7 +7,7 @@ const userDao = require('../dao/userDao');
 const commentDao = require('../dao/commentDao');
 const collectDao = require('../dao/collectDao');
 const readDao = require('../dao/readDao');
-const goodDao = require('../dao/goodDao');
+// const goodDao = require('../dao/goodDao');
 const markDao = require('../dao/markDao');
 
 const Article = `
