@@ -11,7 +11,7 @@ class ArticleDao {
       title: null, // cell 显示
       shareImg: '',
       // head: null, // cell 显示
-      description: null, // 简述
+      description: null, // 简述 SEO
       content: null,
       labels: [],
       draft: true,
@@ -70,7 +70,7 @@ class ArticleDao {
     return article;
   }
 
-  async userArticles(userId, articleId) {
+  async userArticles(userId) {
     if (!(userId instanceof ObjectID)) {
       throw new Error('userId should be ObjectID');
     }
@@ -100,7 +100,6 @@ class ArticleDao {
     if (!this.connected) await this.init();
     await this.Coll.update({ _id: articleId, userId }, { $set: { del: true } });
   }
-  
 }
 
 module.exports = new ArticleDao();
