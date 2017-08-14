@@ -34,6 +34,12 @@ class Mark extends Base {
     const record = await this.Coll.findOne({ userId, articleId });
     return record;
   }
+
+  async userMarks(userId) {
+    if (!this.connected) await this.init();
+    const records = await this.Coll.find({ userId }).toArray();
+    return records;
+  }
 }
 
 module.exports = new Mark();

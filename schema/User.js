@@ -3,6 +3,7 @@ const ObjectID = require('mongodb').ObjectID;
 const articleDao = require('../dao/articleDao');
 const userDao = require('../dao/userDao');
 const collectDao = require('../dao/collectDao');
+const markDao = require('../dao/markDao');
 // const goodDao = require('../dao/goodDao');
 const readDao = require('../dao/readDao');
 const commentDao = require('../dao/commentDao');
@@ -14,7 +15,12 @@ const User = `
     username: String
     userAvatar: String
     userIntro: String
+    # 
     articles(articleId: ID, draft: Boolean): [Article]
+    drafts(articleId: ID): [Article]
+    # markArticles(articleId: ID): [Article]
+    # collectArticles(articleId: ID): [Article]
+    marks: [Mark]
     collects: [Collect]
     # goods: [Good]
     reads: [Read]
@@ -67,9 +73,17 @@ const UserMutation = {
 
 const UserResolver = {
   User: {
-    articles: async (user, args) => {
+    articles: async (user, args, context) => {
       const { _id } = user;
+      const sessUser = context.session.user;
       const { articleId, draft = false } = args;
+      if (draft) {
+        if (sessUser && (sessUser._id === _id.toString())) {
+          const articles = await articleDao.userArticles(_id, articleId, draft);
+          return articles;
+        }
+        return [];
+      }
       const articles = await articleDao.userArticles(_id, articleId, draft);
       return articles;
     },
@@ -77,6 +91,11 @@ const UserResolver = {
       const { _id } = user;
       const collects = await collectDao.userCollects(_id);
       return collects;
+    },
+    marks: async (user) => {
+      const { _id } = user;
+      const marks = await markDao.userMarks(_id);
+      return marks;
     },
     // goods: async (user, args, context, info) => {
     //   const { _id } = user;
