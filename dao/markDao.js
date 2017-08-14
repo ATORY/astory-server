@@ -24,7 +24,7 @@ class Mark extends Base {
     );
     if (!this.connected) await this.init();
     await this.Coll.update(
-      { userId, articleId }, markRecord, { upsert: true },
+      { userId, articleId }, { $set: markRecord }, { upsert: true },
     );
     return markRecord;
   }
@@ -37,7 +37,7 @@ class Mark extends Base {
 
   async userMarks(userId) {
     if (!this.connected) await this.init();
-    const records = await this.Coll.find({ userId }).toArray();
+    const records = await this.Coll.find({ userId, mark: true }).toArray();
     return records;
   }
 }
