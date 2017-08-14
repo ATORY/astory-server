@@ -61,21 +61,36 @@ class ArticleDao {
     return articles;
   }
 
-  async findArticle(articleId) {
+  async findArticle(articleId, userId) {
     if (!(articleId instanceof ObjectID)) {
       throw this.Err('articleId should be string');
     }
+    let query = { _id: articleId };
+    if (userId && (userId instanceof ObjectID)) {
+      query = { _id: articleId, userId };
+    }
     if (!this.connected) await this.init();
-    const article = await this.Coll.findOne({ _id: articleId });
+    const article = await this.Coll.findOne(query);
     return article;
   }
 
-  async userArticles(userId) {
+  async userArticles(userId, articleId, draft) {
     if (!(userId instanceof ObjectID)) {
       throw new Error('userId should be ObjectID');
     }
     if (!this.connected) await this.init();
-    const articles = await this.Coll.find({ userId }).sort({ _id: -1 }).toArray();
+    const articles = await this.Coll.find({ userId, draft })
+      .sort({ _id: -1 }).toArray();
+    return articles;
+  }
+
+  async userDrafts(userId) {
+    if (!(userId instanceof ObjectID)) {
+      throw new Error('userId should be ObjectID');
+    }
+    if (!this.connected) await this.init();
+    const articles = await this.Coll.find({ userId, draft: true })
+      .sort({ _id: -1 }).toArray();
     return articles;
   }
 
@@ -83,14 +98,20 @@ class ArticleDao {
     if (!(userId instanceof ObjectID)) {
       throw new Error('userId should be ObjectID');
     }
-    const newOne = Object.assign({}, this.Schema, { userId }, article);
     if (!this.connected) await this.init();
+    // confirm article belong to user
+    const newOne = Object.assign({}, this.Schema, { userId }, article);
     const { _id } = newOne;
-    const r = await this.Coll.update({ _id }, { $set: newOne }, { upsert: true });
-    if (r.result && r.result.ok === 1 && r.result.n === 1) {
-      return r;
+    const existArticle = await this.Coll.findOne({ _id });
+    if ((existArticle === null) || (existArticle.userId.toString() === userId.toString())) {
+      const r = await this.Coll.update({ _id }, { $set: newOne }, { upsert: true });
+      if (r.result && r.result.ok === 1 && r.result.n === 1) {
+        return { _id, draft: newOne.draft };
+      }
+      throw new this.Err('mongo insert err');
+    } else {
+      return { meg: '没有该文章或没又权限' };
     }
-    throw new this.Err('mongo insert err');
   }
 
   async delArticle(userId, articleId) {

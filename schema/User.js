@@ -14,7 +14,7 @@ const User = `
     username: String
     userAvatar: String
     userIntro: String
-    articles(articleId: ID): [Article]
+    articles(articleId: ID, draft: Boolean): [Article]
     collects: [Collect]
     # goods: [Good]
     reads: [Read]
@@ -69,8 +69,8 @@ const UserResolver = {
   User: {
     articles: async (user, args) => {
       const { _id } = user;
-      const { articleId } = args;
-      const articles = await articleDao.userArticles(_id, articleId);
+      const { articleId, draft = false } = args;
+      const articles = await articleDao.userArticles(_id, articleId, draft);
       return articles;
     },
     collects: async (user) => {

@@ -12,14 +12,15 @@ const { Read, ReadQuery, ReadResolver } = require('./Read');
 
 const RootQuery = `
   type Query {
-    
+
     # Article query
     articles(_id: ID): [Article]
     article(_id: ID!): Article
+    articleEdit(_id: ID!): Article
 
     # User query
     auth: User
-    user(_id: ID!): User
+    user(_id: ID!, draft: Boolean): User
   }
 `;
 

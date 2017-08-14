@@ -33,6 +33,8 @@ const Article = `
     # user_mark_collect_or_not
     mark: Boolean
     collect: Boolean
+
+    msg: String
   }
 
   input ArticleInput{
@@ -73,6 +75,16 @@ const ArticleQuery = {
     readDao.userReadCount(userId, articleId);
     return article;
   },
+  articleEdit: async (_, { _id }, context) => {
+    const { user } = context.session;
+    if (user && user._id) {
+      const userId = new ObjectID(user._id);
+      const articleId = new ObjectID(_id);
+      const article = await articleDao.findArticle(articleId, userId);
+      return article;
+    }
+    return { msg: '请先登录' };
+  },
 };
 
 const ArticleMutation = {
@@ -93,8 +105,10 @@ const ArticleMutation = {
         newArticle.publishDate = new Date();
       }
       newArticle._id = newArticleId;
-      await articleDao.newArticle(userId, newArticle);
-      return { _id: newArticleId, draft };
+      const result = await articleDao.newArticle(userId, newArticle);
+      // console.log(result.result);
+      return result;
+      // return { _id: newArticleId, draft };
     }
     return {};
   },
