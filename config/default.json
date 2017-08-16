@@ -14,7 +14,7 @@
       "MARK": "mark",
       "READ": "read",
       "GOOD": "good",
-      // "FOLLOW": "follow",
+      "FOLLOW": "follow",
       // "REPORT": "report",
       // "SPECIALTOPIC": "specialTopic",
       // "QUESTION": "question",

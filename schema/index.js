@@ -28,6 +28,7 @@ const RootMutation = `
   type Mutation {
     newUser( user: UserInput!): User
     editUser( username: String!, userIntro: String, userAvatar: String): User
+    followUser( userId: String!, follow: Boolean! ): User #this followed user
     newArticle( article: ArticleInput!): Article
     markArticle( articleId: String!, mark: Boolean!): Mark
     collectArticle( articleId: String!, collect: Boolean!): Collect

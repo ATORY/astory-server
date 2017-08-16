@@ -2,6 +2,7 @@ const ObjectID = require('mongodb').ObjectID;
 
 const articleDao = require('../dao/articleDao');
 const userDao = require('../dao/userDao');
+const followDao = require('../dao/followDao');
 const collectDao = require('../dao/collectDao');
 const markDao = require('../dao/markDao');
 // const goodDao = require('../dao/goodDao');
@@ -26,6 +27,8 @@ const User = `
     reads: [Read]
     comments: [Comment]
     isSelf: Boolean
+    followed: Boolean
+    followedNum: Int
   }
 
   input UserInput {
@@ -66,6 +69,17 @@ const UserMutation = {
       const userInfo = await userDao.editUser(userId, username, userIntro, userAvatar);
       session.user = Object.assign({}, user, userInfo);
       return userInfo;
+    }
+    return {};
+  },
+  followUser: async (_, { userId, follow }, context) => {
+    const { session } = context;
+    const { user } = session;
+    if (user && user._id) {
+      const followedId = new ObjectID(user._id);
+      const followId = new ObjectID(userId);
+      const followedUser = await followDao.newUserFollow(followedId, followId, follow);
+      return followedUser;
     }
     return {};
   },
@@ -119,6 +133,27 @@ const UserResolver = {
       const sessionUser = context.session.user;
       const sessionUserId = sessionUser && sessionUser._id;
       return _id.toString() === sessionUserId;
+    },
+
+    followed: async (user, args, context) => {
+      const { _id, followed } = user;
+      if (followed !== undefined) {
+        return followed;
+      }
+      const sessionUser = context.session.user;
+      const sessionUserId = sessionUser && sessionUser._id;
+      if (!sessionUserId) return false;
+      if (_id.toString() === sessionUserId) return true;
+      const followId = _id;
+      const userId = new ObjectID(sessionUserId);
+      const result = await followDao.findFollow(userId, followId);
+      return result;
+    },
+
+    followedNum: async (user) => {
+      const { _id } = user;
+      const number = await followDao.userFollowsNum(_id);
+      return number;
     },
   },
 };
