@@ -10,6 +10,8 @@ const winston = require('winston');
 const Prometheus = require('prom-client');
 const PrometheusGCStats = require('prometheus-gc-stats');
 
+const OpticsAgent = require('optics-agent');
+
 const profile = require('./profile');
 const schema = require('./schema');
 const loggerMiddleware = require('./utils').loggerMiddleware;
@@ -20,7 +22,6 @@ const fileRoot = config.get('profile.uploadPath');
 
 const app = new Koa();
 const router = new KoaRouter();
-
 
 app.keys = ['everyone has a story'];
 
@@ -36,6 +37,12 @@ const CONFIG = {
   rolling: false,
 };
 
+OpticsAgent.configureAgent({
+  apiKey: 'service:Tonyce-astory:gNVabfR0gKixJktHxbIvgw',
+});
+OpticsAgent.instrumentSchema(schema);
+
+app.use(OpticsAgent.koaMiddleware());
 // app.use(logger());
 app.use(loggerMiddleware);
 app.use(session(CONFIG, app));
@@ -62,11 +69,12 @@ router.get('/metrics', (ctx) => {
 /** monitor up */
 
 router.post('/graphql', graphqlKoa((ctx) => {
-  // console.log(ctx.logger);
+  const opticsContext = OpticsAgent.context(ctx.request);
   const graphqlKoaConfig = {
     schema,
     debug: process.env.NODE_ENV !== 'production',
     context: {
+      opticsContext,
       session: ctx.session,
       ctx,
       logger: ctx.logger,
