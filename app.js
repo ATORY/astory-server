@@ -7,6 +7,8 @@ const cors = require('koa-cors');
 const session = require('koa-session');
 const winston = require('winston');
 // const logger = require('koa-logger');
+const Prometheus = require('prom-client');
+const PrometheusGCStats = require('prometheus-gc-stats');
 
 const profile = require('./profile');
 const schema = require('./schema');
@@ -42,6 +44,22 @@ app.use(koaBody());
 app.use(cors({
   credentials: true,
 }));
+
+/**
+ * monitor
+ */
+const collectDefaultMetrics = Prometheus.collectDefaultMetrics;
+const Registry = Prometheus.Registry;
+const register = new Registry();
+
+collectDefaultMetrics({ register });
+PrometheusGCStats(register)();
+
+router.get('/metrics', (ctx) => {
+  ctx.set('Content-Type', Prometheus.register.contentType);
+  ctx.body = register.metrics();
+});
+/** monitor up */
 
 router.post('/graphql', graphqlKoa((ctx) => {
   // console.log(ctx.logger);
