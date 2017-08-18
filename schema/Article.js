@@ -16,6 +16,7 @@ const Article = `
     title: String
     content: String
     shareImg: String
+    description: String
     labels: [String]
     author: User
     readNumber: Int
@@ -41,6 +42,7 @@ const Article = `
     _id: ID
     title: String
     content: String
+    description: String
     shareImg: String
     labels: [String]
     draft: Boolean
@@ -93,8 +95,8 @@ const ArticleMutation = {
     if (user && user._id) {
       let newArticleId = new ObjectID();
       const userId = new ObjectID(user._id);
-      const { _id, title, content, shareImg, draft } = article;
-      const newArticle = { _id, title, content, shareImg, draft };
+      const { _id, title, content, shareImg, draft, description } = article;
+      const newArticle = { _id, title, content, shareImg, draft, description };
       if (_id) {
         newArticleId = new ObjectID(_id);
         newArticle.updateDate = new Date();
@@ -155,7 +157,7 @@ const ArticleMutation = {
       await articleDao.delArticle(userId, delArticleId);
       return { _id: articleId };
     }
-    return {}
+    return {};
   },
 };
 
