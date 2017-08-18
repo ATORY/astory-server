@@ -74,12 +74,14 @@ router.post('/graphql', graphqlKoa((ctx) => {
     schema,
     debug: process.env.NODE_ENV !== 'production',
     context: {
-      opticsContext,
       session: ctx.session,
       ctx,
       logger: ctx.logger,
     },
   };
+  if (process.env.NODE_ENV !== 'production') {
+    graphqlKoaConfig.context.opticsContext = opticsContext;
+  }
   return graphqlKoaConfig;
 }));
 
