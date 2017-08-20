@@ -87,7 +87,7 @@ class UserDao {
         username,
       };
     }
-    throw new this.Err('mongo insert err');
+    throw new this.Err('系统错误');
   }
 
   async getUser(userId) {

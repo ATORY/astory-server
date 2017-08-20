@@ -27,10 +27,12 @@
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
     "mongodb": "^2.2.30",
+    "nodemailer": "^4.0.1",
     "optics-agent": "^1.1.6",
     "pg": "^7.0.2",
     "prom-client": "^10.0.3",
     "prometheus-gc-stats": "^0.5.0",
+    "random-string": "^0.2.0",
     "winston": "^2.3.1"
   },
   "devDependencies": {

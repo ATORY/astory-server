@@ -16,6 +16,7 @@ const User = `
     username: String
     userAvatar: String
     userIntro: String
+    msg: String
     # 
     articles(articleId: ID, draft: Boolean): [Article]
     drafts(articleId: ID): [Article]
@@ -55,9 +56,26 @@ const UserMutation = {
     const { email, password } = user;
     const { session } = context;
     if (email && password) {
-      const newUser = await userDao.createUser({ email, password });
-      session.user = newUser;
-      return newUser;
+      const emailReg = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      if (!emailReg.test(email)) {
+        return {
+          msg: '请使用合法的邮箱地址',
+        };
+      }
+      if (password.length < 6) {
+        return {
+          msg: '密码长度不得小于6位',
+        };
+      }
+      try {
+        const newUser = await userDao.createUser({ email, password });
+        session.user = newUser;
+        return newUser;
+      } catch (error) {
+        return {
+          msg: error.message,
+        };
+      }
     }
     return {};
   },

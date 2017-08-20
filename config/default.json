@@ -15,6 +15,7 @@
       "READ": "read",
       "GOOD": "good",
       "FOLLOW": "follow",
+      "CHECKCODE": "checkcode",
       // "REPORT": "report",
       // "SPECIALTOPIC": "specialTopic",
       // "QUESTION": "question",
