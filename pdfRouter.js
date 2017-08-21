@@ -1,8 +1,12 @@
 const Router = require('koa-router');
 const puppeteer = require('puppeteer');
 const ObjectID = require('mongodb').ObjectID;
+const config = require('config');
 
 const articleDao = require('./dao/articleDao');
+
+const Protocol = config.get('server.Protocol');
+const HOST = config.get('server.HOST');
 
 const router = new Router({
   prefix: '/pdf',
@@ -11,7 +15,7 @@ const router = new Router({
 router.get('/', async (ctx) => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  await page.goto('http://localhost:4000/pdf/page', { waitUntil: 'networkidle' });
+  await page.goto(`${Protocol}//${HOST}/pdf/page`, { waitUntil: 'networkidle' });
   const pdf = await page.pdf({
     // path: 'hn.pdf',
     // displayHeaderFooter: true,
@@ -32,6 +36,11 @@ router.get('/', async (ctx) => {
 });
 
 router.get('/page', async (ctx) => {
+  const host = ctx.headers.host;
+  if (host !== HOST) {
+    ctx.body = '';
+    return;
+  }
   const articleId = new ObjectID('599a8aa109979f26b368b476');
   const article = await articleDao.findArticle(articleId);
   const { content, title } = article;
@@ -44,6 +53,7 @@ router.get('/page', async (ctx) => {
       <link rel='stylesheet' href='https://cdn.bootcss.com/highlight.js/9.12.0/styles/atom-one-dark.min.css' />
       <style>
         * {
+          /*font-family: "Microsoft YaHei", Lyh-Regular, helvetica, arial, sans-serif;*/
           box-sizing: border-box;
         }
         p {

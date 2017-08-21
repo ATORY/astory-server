@@ -1,5 +1,7 @@
 {
   "server": {
+    "Protocol": "http:",
+    "HOST": "localhost:4000",
     "PORT": 4000
   },
   "mongodb": {
