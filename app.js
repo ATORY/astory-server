@@ -13,6 +13,7 @@ const PrometheusGCStats = require('prometheus-gc-stats');
 const OpticsAgent = require('optics-agent');
 
 const pwdRouter = require('./pwdRouter');
+const pdfRouter = require('./pdfRouter');
 const profile = require('./profile');
 const schema = require('./schema');
 const loggerMiddleware = require('./utils').loggerMiddleware;
@@ -98,6 +99,7 @@ app.use(router.routes());
 app.use(router.allowedMethods());
 app.use(profile.routes()).use(profile.allowedMethods());
 app.use(pwdRouter.routes()).use(pwdRouter.allowedMethods());
+app.use(pdfRouter.routes()).use(pdfRouter.allowedMethods());
 
 app.listen(SERVER_CONFIG.PORT, () => {
   winston.info(`${process.env.NODE_ENV}, server start at ${SERVER_CONFIG.PORT}, filePah: ${fileRoot}`);
