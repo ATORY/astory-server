@@ -12,10 +12,11 @@ const router = new Router({
   prefix: '/pdf',
 });
 
-router.get('/', async (ctx) => {
+router.get('/:articleId', async (ctx) => {
+  const { articleId } = ctx.params;
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  await page.goto(`${Protocol}//${HOST}/pdf/page`, { waitUntil: 'networkidle' });
+  await page.goto(`${Protocol}//${HOST}/pdf/page/${articleId}`, { waitUntil: 'networkidle' });
   const pdf = await page.pdf({
     // path: 'hn.pdf',
     // displayHeaderFooter: true,
@@ -35,14 +36,15 @@ router.get('/', async (ctx) => {
   ctx.body = pdf;
 });
 
-router.get('/page', async (ctx) => {
+router.get('/page/:articleId', async (ctx) => {
+  const { articleId } = ctx.params;
   const host = ctx.headers.host;
   if (host !== HOST) {
     ctx.body = '';
     return;
   }
-  const articleId = new ObjectID('599a8aa109979f26b368b476');
-  const article = await articleDao.findArticle(articleId);
+  const id = new ObjectID(articleId);
+  const article = await articleDao.findArticle(id);
   const { content, title } = article;
   const html = `
     <html>
