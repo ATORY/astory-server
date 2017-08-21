@@ -16,7 +16,7 @@ router.get('/', async (ctx) => {
     // path: 'hn.pdf',
     // displayHeaderFooter: true,
     printBackground: true,
-    format: 'A4',
+    format: 'A5',
     margin: {
       top: '10mm',
       bottom: '10mm',
@@ -50,7 +50,7 @@ router.get('/page', async (ctx) => {
           margin: 10px 0;
         }
         .page {
-          width: 8.27in;
+          width: 700px;
           padding: 10px;
           margin: 0 auto;
         }
