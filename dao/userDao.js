@@ -115,6 +115,22 @@ class UserDao {
       userIntro,
     };
   }
+
+  async updateUserPWD(email, password) {
+    const newPassword = generate(password);
+    if (!this.connected) { await this.init(); }
+    const result = await this.Coll.updateOne(
+      { email },
+      { $set: { password: newPassword } },
+    );
+    return result;
+  }
+
+  async findEmail(email) {
+    if (!this.connected) { await this.init(); }
+    const result = await this.Coll.findOne({ email });
+    return result;
+  }
 }
 
 module.exports = new UserDao();

@@ -1,7 +1,9 @@
 const Router = require('koa-router');
 const randomString = require('random-string');
+
 const utils = require('./utils');
 const checkCodeDao = require('./dao/checkCodeDao');
+const userDao = require('./dao/userDao');
 
 const router = new Router({
   prefix: '/pwd',
@@ -14,15 +16,21 @@ router.get('/', async (ctx) => {
 router.put('/', async (ctx) => {
   const body = ctx.request.body;
   const { email } = body;
+  const eml = email.trim();
   const emailReg = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  if (!emailReg.test(email)) {
+  if (!emailReg.test(eml)) {
     ctx.body = { msg: '请输入合法的email' };
     return;
   }
   const code = randomString();
-  await utils.sendEmail(email, code);
-  await checkCodeDao.newRecord(email, code);
-  ctx.body = {};
+  const result = await userDao.findEmail(email);
+  if (result) {
+    await utils.sendEmail(eml, code);
+    await checkCodeDao.newRecord(eml, code);
+    ctx.body = {};
+    return;
+  }
+  ctx.body = { msg: '未发现该用户' };
 });
 
 router.post('/', async (ctx) => {
@@ -39,8 +47,12 @@ router.post('/', async (ctx) => {
       return;
     }
     // update password
-    console.log('password', password);
-    ctx.body = {};
+    const { result } = await userDao.updateUserPWD(email, password);
+    if (result.ok === 1 && result.nModified === 1) {
+      ctx.body = {};
+    } else {
+      ctx.body = { msg: '未发现该用户' };
+    }
   } else {
     ctx.body = { msg: '请在第一步先发送验证码' };
   }

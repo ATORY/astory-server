@@ -31,7 +31,8 @@ class CheckCode {
       {}, this.Schema, { email, code, timeCamp, createDate },
     );
     if (!this.connected) await this.init();
-    const result = await this.Coll.insertOne(record);
+    const result = await this.Coll.update(
+      { email }, { $set: record }, { upsert: true });
     return result;
   }
 
