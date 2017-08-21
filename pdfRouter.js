@@ -14,7 +14,7 @@ router.get('/', async (ctx) => {
   await page.goto('http://localhost:4000/pdf/page', { waitUntil: 'networkidle' });
   const pdf = await page.pdf({
     // path: 'hn.pdf',
-    displayHeaderFooter: true,
+    // displayHeaderFooter: true,
     printBackground: true,
     format: 'A4',
     margin: {
@@ -70,6 +70,10 @@ router.get('/page', async (ctx) => {
       </style>
     </head>
     <body>
+      <div class='ql-snow'>
+        <div class='page ql-editor'>${content}</div>
+      </div>
+      <div style="page-break-before: always; page-break-after: always;" />
       <div class='ql-snow'>
         <div class='page ql-editor'>${content}</div>
       </div>
