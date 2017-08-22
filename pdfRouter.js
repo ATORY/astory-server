@@ -14,7 +14,7 @@ const router = new Router({
 
 router.get('/:articleId', async (ctx) => {
   const { articleId } = ctx.params;
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
   const page = await browser.newPage();
   await page.goto(`${Protocol}//${HOST}/pdf/page/${articleId}`, { waitUntil: 'networkidle' });
   const pdf = await page.pdf({
@@ -30,7 +30,10 @@ router.get('/:articleId', async (ctx) => {
     },
   });
   browser.close();
-  const pdfName = '599a8aa109979f26b368b476.pdf';
+  const id = new ObjectID(articleId);
+  const article = await articleDao.findArticle(id);
+  const { title } = article;
+  const pdfName = `${title}.pdf`;
   ctx.set('Content-Type', 'application/pdf');
   ctx.set('Content-Disposition', `inline; filename=${pdfName}`);
   ctx.body = pdf;
