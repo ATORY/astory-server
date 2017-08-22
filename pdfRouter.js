@@ -58,7 +58,7 @@ router.get('/page/:articleId', async (ctx) => {
       <link rel='stylesheet' href='https://cdn.bootcss.com/highlight.js/9.12.0/styles/atom-one-dark.min.css' />
       <style>
         * {
-          /*font-family: "Microsoft YaHei", Lyh-Regular, helvetica, arial, sans-serif;*/
+          font-family: "Microsoft YaHei", Lyh-Regular, helvetica, arial, sans-serif;
           box-sizing: border-box;
         }
         p {
