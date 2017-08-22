@@ -33,8 +33,8 @@ router.get('/:articleId', async (ctx) => {
   const id = new ObjectID(articleId);
   const article = await articleDao.findArticle(id);
   const { title } = article;
-  const pdfName = `${title}.pdf`;
-  ctx.set('Content-Type', 'application/pdf');
+  const pdfName = new Buffer(`${title}.pdf`).toString('binary');
+  ctx.set('Content-Type', 'application/pdf;charset=utf8');
   ctx.set('Content-Disposition', `inline; filename=${pdfName}`);
   ctx.body = pdf;
 });
