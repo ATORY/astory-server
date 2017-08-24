@@ -64,6 +64,8 @@ app.use(cors({
 const collectDefaultMetrics = Prometheus.collectDefaultMetrics;
 const Registry = Prometheus.Registry;
 const register = new Registry();
+const defaultLabels = { serviceName: 'astory-server' };
+register.setDefaultLabels(defaultLabels);
 
 collectDefaultMetrics({ register });
 PrometheusGCStats(register)();
