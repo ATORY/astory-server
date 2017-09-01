@@ -34,5 +34,9 @@
     "uploadPath": "/tmp",
     "fileHostBuild": "http://imgs.atory.cc",
     "fileHost": "http://localhost:9090"
+  },
+  "cert": {
+    "private": "/Users/veryci/Documents/happy/astory-server/cert/key",
+    "public": "/Users/veryci/Documents/happy/astory-server/cert/pub.pem"
   }
 }

@@ -1,4 +1,6 @@
+
 const ObjectID = require('mongodb').ObjectID;
+const jwt = require('jsonwebtoken');
 
 const articleDao = require('../dao/articleDao');
 const userDao = require('../dao/userDao');
@@ -9,6 +11,8 @@ const markDao = require('../dao/markDao');
 const readDao = require('../dao/readDao');
 const commentDao = require('../dao/commentDao');
 
+const { signToken } = require('../utils');
+
 const User = `
   type User {
     _id: ID
@@ -16,6 +20,7 @@ const User = `
     username: String
     userAvatar: String
     userIntro: String
+    token: String
     msg: String
     # 
     articles(articleId: ID, draft: Boolean): [Article]
@@ -70,7 +75,9 @@ const UserMutation = {
       try {
         const newUser = await userDao.createUser({ email, password });
         session.user = newUser;
-        return newUser;
+        // console.log(newUser);
+        const token = signToken(newUser);
+        return Object.assign({}, newUser, { token });
       } catch (error) {
         return {
           msg: error.message,
@@ -86,7 +93,8 @@ const UserMutation = {
       const userId = new ObjectID(user._id);
       const userInfo = await userDao.editUser(userId, username, userIntro, userAvatar);
       session.user = Object.assign({}, user, userInfo);
-      return userInfo;
+      const token = signToken(session.user);
+      return Object.assign({}, session.user, { token });
     }
     return {};
   },

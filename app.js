@@ -16,7 +16,8 @@ const pwdRouter = require('./pwdRouter');
 const pdfRouter = require('./pdfRouter');
 const profile = require('./profile');
 const schema = require('./schema');
-const loggerMiddleware = require('./utils').loggerMiddleware;
+const { loggerMiddleware, verifyToken } = require('./utils');
+
 
 const SERVER_CONFIG = config.get('server');
 
@@ -52,6 +53,8 @@ if (isProd) {
 // app.use(logger());
 app.use(loggerMiddleware);
 app.use(session(CONFIG, app));
+// token
+app.use(verifyToken);
 
 app.use(koaBody());
 app.use(cors({
