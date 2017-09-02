@@ -27,6 +27,7 @@ const RootQuery = `
 const RootMutation = `
   type Mutation {
     newUser( user: UserInput!): User
+    logoutUser: User
     editUser( username: String!, userIntro: String, userAvatar: String): User
     followUser( userId: String!, follow: Boolean! ): User #this followed user
     newArticle( article: ArticleInput!): Article
