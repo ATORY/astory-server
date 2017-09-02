@@ -20,7 +20,7 @@ const RootQuery = `
 
     # User query
     auth: User
-    user(_id: ID!, draft: Boolean): User
+    user(_id: ID, isSelf: Boolean, draft: Boolean): User
   }
 `;
 

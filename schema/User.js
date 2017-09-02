@@ -48,7 +48,12 @@ const User = `
 `;
 
 const UserQuery = {
-  user: async (_, { _id }) => {
+  user: async (_, { _id, isSelf }, context) => {
+    if (isSelf) {
+      const user = context.session.user;
+      user._id = new ObjectID(user._id);
+      return user;
+    }
     const userId = new ObjectID(_id);
     const user = await userDao.getUser(userId);
     return user;
