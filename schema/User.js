@@ -48,7 +48,12 @@ const User = `
 `;
 
 const UserQuery = {
-  user: async (_, { _id }) => {
+  user: async (_, { _id, isSelf }, context) => {
+    if (isSelf) {
+      const user = context.session.user;
+      user._id = new ObjectID(user._id);
+      return user;
+    }
     const userId = new ObjectID(_id);
     const user = await userDao.getUser(userId);
     return user;
@@ -58,10 +63,12 @@ const UserQuery = {
 
 const UserMutation = {
   newUser: async (_, { user }, context) => {
-    const { email, password } = user;
+    let email = user.email;
+    const { password } = user;
+    email = email.toLowerCase();
     const { session } = context;
     if (email && password) {
-      const emailReg = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      const emailReg = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       if (!emailReg.test(email)) {
         return {
           msg: '请使用合法的邮箱地址',
@@ -85,6 +92,14 @@ const UserMutation = {
       }
     }
     return {};
+  },
+  logoutUser: (_, args, context) => {
+    const { session, ctx } = context;
+    const { user } = session;
+    const _id = user && user._id;
+    ctx.session = null;
+    session.user = null;
+    return { _id, token: '' };
   },
   editUser: async (_, { username, userIntro, userAvatar }, context) => {
     const { session } = context;
@@ -118,7 +133,7 @@ const UserResolver = {
       const sessUser = context.session.user;
       const { articleId, draft = false } = args;
       if (draft) {
-        if (sessUser && (sessUser._id === _id.toString())) {
+        if (sessUser && (sessUser._id === (_id && _id.toString()))) {
           const articles = await articleDao.userArticles(_id, articleId, draft);
           return articles;
         }
@@ -158,7 +173,7 @@ const UserResolver = {
       const { _id } = user;
       const sessionUser = context.session.user;
       const sessionUserId = sessionUser && sessionUser._id;
-      return _id.toString() === sessionUserId;
+      return (_id && _id.toString()) === sessionUserId;
     },
 
     followed: async (user, args, context) => {
@@ -169,7 +184,7 @@ const UserResolver = {
       const sessionUser = context.session.user;
       const sessionUserId = sessionUser && sessionUser._id;
       if (!sessionUserId) return false;
-      if (_id.toString() === sessionUserId) return true;
+      if ((_id && _id.toString()) === sessionUserId) return true;
       const followId = _id;
       const userId = new ObjectID(sessionUserId);
       const result = await followDao.findFollow(userId, followId);
