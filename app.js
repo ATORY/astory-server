@@ -50,17 +50,6 @@ if (isProd) {
   app.use(OpticsAgent.koaMiddleware());
 }
 
-// app.use(logger());
-app.use(loggerMiddleware);
-app.use(session(CONFIG, app));
-// token
-app.use(verifyToken);
-
-app.use(koaBody());
-app.use(cors({
-  credentials: true,
-}));
-
 /**
  * monitor
  */
@@ -77,7 +66,34 @@ router.get('/metrics', (ctx) => {
   ctx.set('Content-Type', Prometheus.register.contentType);
   ctx.body = register.metrics();
 });
+
+const httpRequestDurationMicroseconds = new Prometheus.Histogram({
+  name: 'http_request_duration_ms',
+  help: 'Duration of HTTP requests in ms',
+  labelNames: ['route'],
+  // buckets for response time from 0.1ms to 500ms
+  buckets: [0.10, 5, 15, 50, 100, 200, 300, 400, 500],
+});
 /** monitor up */
+
+app.use(async (ctx, next) => {
+  const start = Date.now();
+  await next();
+  const end = Date.now();
+  const responseTimeInMs = end - start;
+  httpRequestDurationMicroseconds.labels(ctx.path).observe(responseTimeInMs);
+});
+
+// app.use(logger());
+app.use(loggerMiddleware);
+app.use(session(CONFIG, app));
+// token
+app.use(verifyToken);
+
+app.use(koaBody());
+app.use(cors({
+  credentials: true,
+}));
 
 router.post('/graphql', graphqlKoa((ctx) => {
   const graphqlKoaConfig = {
