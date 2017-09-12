@@ -95,7 +95,7 @@ router.get('/page/:articleId', async (ctx) => {
     </body>
     </html>
   `;
-  ctx.res.end(html);
+  ctx.body = html;
 });
 
 module.exports = router;
