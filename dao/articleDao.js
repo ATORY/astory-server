@@ -65,9 +65,9 @@ class ArticleDao {
     if (!(articleId instanceof ObjectID)) {
       throw this.Err('articleId should be string');
     }
-    let query = { _id: articleId, draft: false, del: false };
+    let query = { _id: articleId, del: false };
     if (userId && (userId instanceof ObjectID)) {
-      query = { _id: articleId, userId, draft: false, del: false };
+      query = { _id: articleId, userId, del: false };
     }
     if (!this.connected) await this.init();
     const article = await this.Coll.findOne(query);
